@@ -1,0 +1,32 @@
+<div>
+  <button (click)="showLoginForm()">Login</button>
+  <button (click)="showRegisterForm()">Register</button>
+  <br><br>
+  <form (ngSubmit)="login()" *ngIf="showLogin" [formGroup]="loginForm">
+    <div>
+      <label for="username">Username:</label>
+      <input type="text" id="username" formControlName="username">
+    </div>
+    <div>
+      <label for="password">Password:</label>
+      <input type="password" id="password" formControlName="password">
+    </div>
+    <button type="submit" [disabled]="!loginForm.valid">Login</button>
+  </form>
+
+  <form (ngSubmit)="register()" *ngIf="showRegister" [formGroup]="registrationForm">
+    <div>
+      <label for="username">Username:</label>
+      <input type="text" id="username" formControlName="username">
+    </div>
+    <div>
+      <label for="password">Password:</label>
+      <input type="password" id="password" formControlName="password">
+    </div>
+    <div>
+      <label for="email">Email:</label>
+      <input type="text" id="email" formControlName="email">
+    </div>
+    <button type="submit" [disabled]="!registrationForm.valid">Register</button>
+  </form>
+</div>

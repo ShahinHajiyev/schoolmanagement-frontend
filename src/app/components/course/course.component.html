@@ -1,0 +1,11 @@
+
+  <ul>
+    <li *ngFor="let object of courses">
+      <!-- Display object properties -->
+      <p>ID: {{ object.courseId }}</p>
+      <p>Name: {{ object.courseName }}</p>
+      <p>Description: {{ object.credit }}</p>
+      <!-- Add more properties as needed -->
+    </li>
+  </ul>
+  <button (click)="logout()">LOGOUT</button>
