@@ -1,0 +1,46 @@
+.login-page{
+    display: flex;
+    background-color: bisque;
+    height:100vh;
+    width: inherit;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-form{
+   
+    justify-content: center;
+    align-items: center;
+    height: 10em;
+    width: 15em;
+}
+
+.buttons {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 15px;
+}
+
+.username, .password, .email{
+    font-size: 1em;
+}
+
+.username > label {
+    padding-right: 20px;
+}
+
+.password > label {
+    padding-right: 19.5px;
+}
+
+.email > label{
+    padding-right: 42.5px;
+}
+
+.form-button{
+    position: absolute;
+    margin-top: 10px;
+}
+
+
+

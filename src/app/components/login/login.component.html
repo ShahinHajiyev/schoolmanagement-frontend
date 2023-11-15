@@ -1,32 +1,37 @@
-<div>
-  <button (click)="showLoginForm()">Login</button>
-  <button (click)="showRegisterForm()">Register</button>
-  <br><br>
-  <form (ngSubmit)="login()" *ngIf="showLogin" [formGroup]="loginForm">
-    <div>
-      <label for="username">Username:</label>
-      <input type="text" id="username" formControlName="username">
-    </div>
-    <div>
-      <label for="password">Password:</label>
-      <input type="password" id="password" formControlName="password">
-    </div>
-    <button type="submit" [disabled]="!loginForm.valid">Login</button>
-  </form>
+<div class="login-page">
+  <div class="login-form">
 
-  <form (ngSubmit)="register()" *ngIf="showRegister" [formGroup]="registrationForm">
-    <div>
-      <label for="username">Username:</label>
-      <input type="text" id="username" formControlName="username">
+    <br><br>
+    <form (ngSubmit)="login()" *ngIf="showLogin" [formGroup]="loginForm">
+      <div class="username">
+        <label for="username">Username</label>
+        <input type="text" id="username" formControlName="username">
+      </div>
+      <div class="password">
+        <label for="password">Password </label>
+        <input type="password" id="password" formControlName="password">
+      </div>
+      <button class="form-button"  type="submit" [disabled]="!loginForm.valid">Login</button>
+    </form>
+
+    <form (ngSubmit)="register()" *ngIf="showRegister" [formGroup]="registrationForm">
+      <div class="username">
+        <label for="username">Username</label>
+        <input type="text" id="username" formControlName="username">
+      </div>
+      <div class="password">
+        <label for="password">Password </label>
+        <input type="password" id="password" formControlName="password">
+      </div>
+      <div class="email">
+        <label for="email">Email </label>
+        <input type="text" id="email" formControlName="email">
+      </div>
+      <button class="form-button" type="submit" [disabled]="!registrationForm.valid">Register</button>
+    </form>
+    <div class="buttons">
+      <button (click)="showLoginForm()" *ngIf="showRegister" [hidden]>Login</button>
+      <button (click)="showRegisterForm()" *ngIf="showLogin" [hidden]>Register</button>
     </div>
-    <div>
-      <label for="password">Password:</label>
-      <input type="password" id="password" formControlName="password">
-    </div>
-    <div>
-      <label for="email">Email:</label>
-      <input type="text" id="email" formControlName="email">
-    </div>
-    <button type="submit" [disabled]="!registrationForm.valid">Register</button>
-  </form>
+  </div>
 </div>

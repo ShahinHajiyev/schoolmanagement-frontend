@@ -60,7 +60,6 @@ export class AuthService {
 
 }
 
-
 export const canActivate: CanActivateFn = (
   route: ActivatedRouteSnapshot,
   state: RouterStateSnapshot
