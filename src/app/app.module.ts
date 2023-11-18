@@ -10,6 +10,7 @@ import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { AuthInterceptor } from './services/auth.interceptor';
 import { CourseComponent } from './components/course/course.component';
 import { JWT_OPTIONS, JwtHelperService } from '@auth0/angular-jwt';
+import { AdminComponent } from './components/admin/admin.component';
 
 
 
@@ -17,7 +18,8 @@ import { JWT_OPTIONS, JwtHelperService } from '@auth0/angular-jwt';
   declarations: [
     AppComponent,
     LoginComponent,
-    CourseComponent
+    CourseComponent,
+    AdminComponent
   ],
   imports: [
     BrowserModule,

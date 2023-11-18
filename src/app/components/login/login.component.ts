@@ -16,6 +16,7 @@ export class LoginComponent implements OnInit {
 
   showLogin: boolean = true;
   showRegister: boolean = false;
+  adminRole: string = "ROLE_ADMIN";
 
 
 
@@ -26,14 +27,14 @@ export class LoginComponent implements OnInit {
 
 
   constructor(private authService: AuthService,
-              private router : Router){}
+    private router: Router) { }
 
   ngOnInit() {
 
     if (this.authService.getToken() !== '') {
       this.isLoggedIn = true;
     }
-    
+
     this.loginForm = new FormGroup({
       username: new FormControl('', [Validators.required]),
       password: new FormControl('', [Validators.required]),
@@ -46,34 +47,40 @@ export class LoginComponent implements OnInit {
     })
   }
 
-    login():void{
-      this.authService.login(this.loginForm.value.username, this.loginForm.value.password)
+  login(): void {
+
+    this.authService.login(this.loginForm.value.username, this.loginForm.value.password)
       .pipe(take(1))
-      .subscribe((loggedIn) =>{
-        if(loggedIn) {
+      .subscribe((loggedIn) => {
+        if (loggedIn) {
           this.isLoggedIn = true;
 
-        } 
-        //localStorage.setItem('auth-token',response.headers.get('Authorization') || '');
-        this.router.navigate(['/course']); 
-      } 
+          if (this.authService.isAdmin(this.adminRole) === true) {
+            this.router.navigate(['/admin']);
+          }
+          else
+            this.router.navigate(['/course']);
+          
+        }
+      }
       );
-    }
 
-    register() {
-      throw new Error('Method not implemented.');
-      }
+  }
 
-      showLoginForm() {
-        this.showLogin = true;
-        this.showRegister = false;
-      }
-    
-      showRegisterForm() {
-        this.showLogin = false;
-        this.showRegister = true;
-      }
+  register() {
+    throw new Error('Method not implemented.');
+  }
+
+  showLoginForm() {
+    this.showLogin = true;
+    this.showRegister = false;
+  }
+
+  showRegisterForm() {
+    this.showLogin = false;
+    this.showRegister = true;
+  }
 
 
-    
+
 }
