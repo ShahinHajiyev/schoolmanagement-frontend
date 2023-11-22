@@ -42,7 +42,10 @@ export class LoginComponent implements OnInit {
 
     this.registrationForm = new FormGroup({
       username: new FormControl('', [Validators.required]),
-      password: new FormControl('', [Validators.required])
+      password: new FormControl('', [Validators.required]),
+      confirmPassword: new FormControl('', [Validators.required]),
+      neptunCode: new FormControl('', [Validators.required]),
+      email: new FormControl('', [Validators.required])
     })
   }
 
@@ -65,8 +68,19 @@ export class LoginComponent implements OnInit {
       );
 
   }
+
   register() {
-    throw new Error('Method not implemented.');
+    this.authService.register(this.registrationForm.value.password, 
+                              this.registrationForm.value.confirmPassword,
+                              this.registrationForm.value.neptunCode,
+                              this.registrationForm.value.email ).subscribe(() => {
+                                if (this.registrationForm.value.password === this.registrationForm.value.confirmPassword) {
+                                  console.log('Registration successful');
+                                }else{
+                                  console.error('Passwords do not match');
+                                }
+                              }
+                              );
   }
 
   showLoginForm() {

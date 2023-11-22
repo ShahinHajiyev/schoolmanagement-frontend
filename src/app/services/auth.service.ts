@@ -35,6 +35,10 @@ export class AuthService {
       );
   }
 
+  register(username: string, password: string, neptunCode: string, email: string): Observable<any>{
+     return this.http.post<any>(`${this.apiURL}/user/register`,{username, password})
+  }
+
   logout(): void {
     localStorage.removeItem('auth-token');
   }

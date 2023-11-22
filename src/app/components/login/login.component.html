@@ -3,6 +3,8 @@
 
     <br><br>
     <form (ngSubmit)="login()" *ngIf="showLogin" [formGroup]="loginForm">
+      <h2 class="login-title">Login</h2>
+      <br>
       <div class="username">
         <label for="username">Username</label>
         <input type="text" id="username" formControlName="username">
@@ -11,10 +13,12 @@
         <label for="password">Password </label>
         <input type="password" id="password" formControlName="password">
       </div>
-      <button class="form-button"  type="submit" [disabled]="!loginForm.valid">Login</button>
+      <button class="form-button" type="submit" [disabled]="!loginForm.valid">Login</button>
     </form>
 
     <form (ngSubmit)="register()" *ngIf="showRegister" [formGroup]="registrationForm">
+      <h2 class="login-title">Register</h2>
+      <br>
       <div class="username">
         <label for="username">Username</label>
         <input type="text" id="username" formControlName="username">
@@ -22,6 +26,18 @@
       <div class="password">
         <label for="password">Password </label>
         <input type="password" id="password" formControlName="password">
+      </div>
+      <div class="password">
+        <label for="confirmPassword">Confirm Password </label>
+        <input type="password" id="confirmPassword" formControlName="confirmPassword">
+      </div>
+      <div class="neptunCode">
+        <label for="neptunCode">Neptun Code </label>
+        <input type="text" id="neptunCode" formControlName="neptunCode">
+      </div>
+      <div class="email">
+        <label for="email">Email</label>
+        <input type="text" id="email" formControlName="email">
       </div>
       <button class="form-button" type="submit" [disabled]="!registrationForm.valid">Register</button>
     </form>
