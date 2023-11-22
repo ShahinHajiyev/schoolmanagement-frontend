@@ -31,7 +31,7 @@ export class LoginComponent implements OnInit {
 
   ngOnInit() {
 
-    if (this.authService.getToken() !== '') {
+    if (this.authService.getAuthToken() !== '') {
       this.isLoggedIn = true;
     }
 
@@ -42,8 +42,7 @@ export class LoginComponent implements OnInit {
 
     this.registrationForm = new FormGroup({
       username: new FormControl('', [Validators.required]),
-      password: new FormControl('', [Validators.required]),
-      email: new FormControl('', [Validators.required])
+      password: new FormControl('', [Validators.required])
     })
   }
 
@@ -66,7 +65,6 @@ export class LoginComponent implements OnInit {
       );
 
   }
-
   register() {
     throw new Error('Method not implemented.');
   }

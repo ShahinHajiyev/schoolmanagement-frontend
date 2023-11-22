@@ -12,7 +12,7 @@ import * as jwt_decode from 'jwt-decode';
 })
 export class AuthService {
 
-  private apiURL = 'http://localhost:8090/api'
+  public apiURL = 'http://localhost:8090/api'
   static isAuthenticated: any;
   private isLoggedIn: boolean = false;
 
@@ -35,24 +35,23 @@ export class AuthService {
       );
   }
 
-
   logout(): void {
     localStorage.removeItem('auth-token');
   }
 
-  getToken(): string | null {
+  getAuthToken(): string | null {
     return localStorage.getItem('auth-token');
   }
 
 
   isTokenExpired(): Observable<boolean> {
-    const token = this.getToken();
+    const token = this.getAuthToken();
 
     return of(this.jwtHelper.isTokenExpired(token));
   }
 
   isLogged(): Observable<boolean> {
-    if (this.getToken() != null) {
+    if (this.getAuthToken() != null) {
       this.isLoggedIn = true;
     }
     return of(this.isLoggedIn);
@@ -61,13 +60,13 @@ export class AuthService {
   isAdmin(adminRole: string) : boolean  {
 
     let isAdmin : boolean = false;
-    const token: any = this.getToken();
+    const token: any = this.getAuthToken();
    
     const decodedToken: any = jwt_decode.jwtDecode(token)
-    let adminAuthority = decodedToken.authorities.find((auth: { authority: string; }) => auth.authority === 'ROLE_ADMIN');
-    let extractedRole = adminAuthority ? adminAuthority.authority : null;
+    let roleObjectFromToken = decodedToken.authorities.find((auth: { authority: string; }) => auth.authority === 'ROLE_ADMIN');
+    let roleFromToken = roleObjectFromToken ? roleObjectFromToken.authority : null;
 
-      if (extractedRole === adminRole){
+      if (roleFromToken === adminRole){
         return isAdmin = true;
       }
     

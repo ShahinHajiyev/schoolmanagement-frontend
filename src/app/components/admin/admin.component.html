@@ -1,1 +1,16 @@
 <h1>THIS IS ADMIN PAGE</h1>
+
+<form (ngSubmit)="addStudent()" [formGroup]="studentForm">
+    <div class="neptunCode">
+        <label for="neptunCode">Neptun Code</label>
+        <input type="text" name="neptunCode" id="neptunCode" formControlName="neptunCode">
+    </div>
+    <div class="email">
+        <label for="email">Email</label>
+        <input type="text" name="email" id="email" formControlName="email">
+    </div>
+
+    <button>Add Student</button>
+
+
+</form>
