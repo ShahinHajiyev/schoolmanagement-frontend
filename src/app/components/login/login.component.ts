@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { AuthService } from 'src/app/services/auth.service';
+import { AuthService, CanComponentDeactivate, CanDeactivateType } from 'src/app/services/auth.service';
 import { FormGroup, Validators, FormControl } from '@angular/forms';
-import { take } from 'rxjs';
+import { async, take } from 'rxjs';
 import { Router } from '@angular/router';
 
 
@@ -17,6 +17,7 @@ export class LoginComponent implements OnInit {
   showLogin: boolean = true;
   showRegister: boolean = false;
   adminRole: string = "ROLE_ADMIN";
+  //configure hompath normally, it does not assign, only going to the empty route which is login in the routing table i guess.
 
 
 
@@ -24,24 +25,41 @@ export class LoginComponent implements OnInit {
   registrationForm!: FormGroup;
   isLoggedIn: boolean = false;
   showRegistration: boolean = false;
+  homePath: string = '';
+ // homePath = this.authService.isAdmin(this.adminRole) ? "/admin" : "/course";
+
 
 
   constructor(private authService: AuthService,
     private router: Router) { }
 
   ngOnInit() {
+    
+    console.log("_____________", this.homePath)
 
-    if (this.authService.getAuthToken() !== '') {
+    
+    //console.log("THIS IS THE HOMEPATH URL", this.homePath)
+
+    if (this.authService.getAuthToken() != null) {
+      console.log("LOGIN ONINIT")
+      //this.homePath = this.authService.isAdmin(this.adminRole) ? "/admin" : "/course";
+      this.homePath = this.authService.isAdmin(this.adminRole) ? '/admin' : '/course';
       this.isLoggedIn = true;
+      console.log("--------------", this.homePath)
+      console.log("THIS IS THE LOGIN CHECK URL", this.router.url)
+      //console.log("THIS IS THE HOMEPATH URL", this.homePath)
+      this.router.navigate([this.homePath])
+      //this.router.navigate(['/course'])
     }
 
+
+
     this.loginForm = new FormGroup({
-      username: new FormControl('', [Validators.required]),
+      neptunCode: new FormControl('', [Validators.required]),
       password: new FormControl('', [Validators.required]),
     });
 
     this.registrationForm = new FormGroup({
-      username: new FormControl('', [Validators.required]),
       password: new FormControl('', [Validators.required]),
       confirmPassword: new FormControl('', [Validators.required]),
       neptunCode: new FormControl('', [Validators.required]),
@@ -49,38 +67,55 @@ export class LoginComponent implements OnInit {
     })
   }
 
+
+
+
+
   login(): void {
-
-    this.authService.login(this.loginForm.value.username, this.loginForm.value.password)
+    this.authService.login(this.loginForm.value.neptunCode, this.loginForm.value.password)
       .pipe(take(1))
-      .subscribe((loggedIn) => {
-        if (loggedIn) {
-          this.isLoggedIn = true;
+      .subscribe({
+        next: (loggedIn) => {
+          if (loggedIn) {
+            this.isLoggedIn = true;
+            this.homePath = this.authService.isAdmin(this.adminRole) ? "/admin" : "/course";
+            console.log("I AM IN LOGIN SUBSCRIBE")
 
-          if (this.authService.isAdmin(this.adminRole) === true) {
-            this.router.navigate(['/admin']);
+            if (this.authService.isAdmin(this.adminRole) === true) {
+              //this.homePath = '/admin'
+              console.log("I AM HERE", this.homePath)
+              //this.router.navigate([homePath]);
+              this.router.navigate([this.homePath])
+            }
+            else {
+              //this.homePath = '/course'
+              //this.router.navigate([this.homePath]);
+              console.log("I AM HERE", this.homePath)
+              this.router.navigate([this.homePath])
+            }
+
+
           }
-          else
-            this.router.navigate(['/course']);
-          
-        }
+        },
+        error: (e) => console.error("Wrong credentials", e),
+        complete: () => console.info('complete')
       }
       );
 
   }
 
   register() {
-    this.authService.register(this.registrationForm.value.password, 
-                              this.registrationForm.value.confirmPassword,
-                              this.registrationForm.value.neptunCode,
-                              this.registrationForm.value.email ).subscribe(() => {
-                                if (this.registrationForm.value.password === this.registrationForm.value.confirmPassword) {
-                                  console.log('Registration successful');
-                                }else{
-                                  console.error('Passwords do not match');
-                                }
-                              }
-                              );
+    this.authService.register(this.registrationForm.value.password,
+      this.registrationForm.value.confirmPassword,
+      this.registrationForm.value.neptunCode,
+      this.registrationForm.value.email).subscribe(() => {
+        if (this.registrationForm.value.password === this.registrationForm.value.confirmPassword) {
+          console.log('Registration successful');
+        } else {
+          console.error('Passwords do not match');
+        }
+      }
+      );
   }
 
   showLoginForm() {

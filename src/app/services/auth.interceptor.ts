@@ -14,6 +14,10 @@ export class AuthInterceptor implements HttpInterceptor{
 
   intercept(req: HttpRequest<any>, next: HttpHandler) {
     const authToken = this.authService.getAuthToken();
+   // const URL = 'http://localhost:8090/api/course/register';
+   // if (URL) { 
+   //   next.handle(req);        //did not work, still gives forbidden request
+   // }
     if (authToken) {
       const authReq = req.clone({
         setHeaders: { Authorization: `Bearer ${authToken}` }

@@ -1,8 +1,8 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterStateSnapshot } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { Course } from 'src/app/interfaces/course';
-import { AuthService } from 'src/app/services/auth.service';
+import { AuthService, CanComponentDeactivate, CanDeactivateType } from 'src/app/services/auth.service';
 import { CourseService } from 'src/app/services/course.service';
 
 @Component({
@@ -10,7 +10,7 @@ import { CourseService } from 'src/app/services/course.service';
   templateUrl: './course.component.html',
   styleUrls: ['./course.component.css']
 })
-export class CourseComponent {
+export class CourseComponent implements OnInit, CanComponentDeactivate {
 
   courses: Course[] = [];
   isLoggedIn = false;
@@ -26,6 +26,37 @@ export class CourseComponent {
      this.getCourses();
      
   }
+
+   canDeactivate(currentState: RouterStateSnapshot, 
+                 nextState: RouterStateSnapshot): CanDeactivateType {
+    console.log("HERE")
+    
+    const isLoginRoute = window.location.pathname.includes('/login');
+
+    const currentPath = currentState.url;
+    console.log('CurrentState', currentPath)
+    const nextRoute = nextState && nextState.url.includes('/login');
+    console.log("Next url", nextState.url)
+    console.log("PATHNAME" , window.location.pathname)
+
+    console.log(isLoginRoute)
+    console.log(this.router.url)
+
+    console.log("The next route" , nextRoute)
+
+    if (this.authService.isLogoutInProcess) {
+      this.authService.completeLogout();
+      return true;
+    }
+
+    if (this.isLoggedIn && nextRoute) {
+      // If the user is logged in, prevent navigation by returning false
+      return false;
+    }
+
+    // Allow navigation if the user is not logged in
+    return true;
+  } 
 
   getCourses():void{
      this.courseService.getCourses().subscribe(data => {

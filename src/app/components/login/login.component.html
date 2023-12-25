@@ -6,8 +6,8 @@
       <h2 class="login-title">Login</h2>
       <br>
       <div class="username">
-        <label for="username">Username</label>
-        <input type="text" id="username" formControlName="username">
+        <label for="neptunCode">Username</label>
+        <input type="text" id="neptunCode" formControlName="neptunCode">
       </div>
       <div class="password">
         <label for="password">Password </label>
@@ -19,10 +19,6 @@
     <form (ngSubmit)="register()" *ngIf="showRegister" [formGroup]="registrationForm">
       <h2 class="login-title">Register</h2>
       <br>
-      <div class="username">
-        <label for="username">Username</label>
-        <input type="text" id="username" formControlName="username">
-      </div>
       <div class="password">
         <label for="password">Password </label>
         <input type="password" id="password" formControlName="password">
