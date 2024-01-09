@@ -1,0 +1,30 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+.main-container{
+    display: flex;
+    
+}
+
+.sidebar{
+    width: 15%;
+    background-color: #f0f0f0;
+}
+
+
+.router-container{
+    flex-basis: 100%;
+    padding-left: 3%;
+    background-color: #f0f0f0;
+}
+
+
+
+    
+
+
+
+

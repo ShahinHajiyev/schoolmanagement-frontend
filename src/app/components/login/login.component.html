@@ -1,45 +1,46 @@
 <div class="login-page">
   <div class="login-form">
-
     <br><br>
     <form (ngSubmit)="login()" *ngIf="showLogin" [formGroup]="loginForm">
-      <h2 class="login-title">Login</h2>
+      <h2>Login</h2>
       <br>
-      <div class="username">
-        <label for="neptunCode">Username</label>
-        <input type="text" id="neptunCode" formControlName="neptunCode">
+      <div class="inputbox">
+        <input type="text" id="neptunCode" formControlName="neptunCode" placeholder="neptun code">
       </div>
-      <div class="password">
-        <label for="password">Password </label>
-        <input type="password" id="password" formControlName="password">
+      <br>
+      <div class="inputbox">
+        <input type="password" id="password" formControlName="password" placeholder="password">
       </div>
-      <button class="form-button" type="submit" [disabled]="!loginForm.valid">Login</button>
+      <br>
+      <button class="inputbox" type="submit" [disabled]="!loginForm.valid">Login</button>
     </form>
 
     <form (ngSubmit)="register()" *ngIf="showRegister" [formGroup]="registrationForm">
-      <h2 class="login-title">Register</h2>
+      <h2>Register</h2>
       <br>
-      <div class="password">
-        <label for="password">Password </label>
-        <input type="password" id="password" formControlName="password">
+      <div class="inputbox">
+        <input type="text" id="neptunCode" formControlName="neptunCode" placeholder="neptun code">
       </div>
-      <div class="password">
-        <label for="confirmPassword">Confirm Password </label>
-        <input type="password" id="confirmPassword" formControlName="confirmPassword">
+      <br>
+      <div class="inputbox">
+        <input type="text" id="email" formControlName="email" placeholder="email">
       </div>
-      <div class="neptunCode">
-        <label for="neptunCode">Neptun Code </label>
-        <input type="text" id="neptunCode" formControlName="neptunCode">
+      <br>
+      <div class="inputbox">
+        <input type="password" id="password" formControlName="password" placeholder="password">
       </div>
-      <div class="email">
-        <label for="email">Email</label>
-        <input type="text" id="email" formControlName="email">
+      <br>
+      <div class="inputbox">
+        <input type="password" id="confirmPassword" formControlName="confirmPassword" placeholder="confirm password">
       </div>
-      <button class="form-button" type="submit" [disabled]="!registrationForm.valid">Register</button>
+      <br>
+      <button class="inputbox" type="submit" [disabled]="!registrationForm.valid">Register</button>
     </form>
     <div class="buttons">
-      <button (click)="showLoginForm()" *ngIf="showRegister" [hidden]>Login</button>
+      <a href="#" *ngIf="showLogin" [hidden] >Forgot password</a>
+      <button (click)="showLoginForm()" *ngIf="showRegister" [hidden] id="showlogin">Login</button>
       <button (click)="showRegisterForm()" *ngIf="showLogin" [hidden]>Register</button>
+      
     </div>
   </div>
 </div>
