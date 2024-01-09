@@ -1,0 +1,126 @@
+.dashboard-container{
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+    height: 100vh;
+}
+
+.search-bar-row{
+    display: flex;
+    padding: 10px;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex: 100%;
+    height: 10%;
+}
+
+.search-box{
+    height: 50px;
+    width: 100px;
+    flex: 50%;
+}
+
+ul{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 5px;
+    flex: 50%;
+}
+
+li {
+    height: 50px;
+    width: 50px;
+    border: 1px solid black;
+}
+
+.dashboard-wrapper{
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-flow: column wrap;
+    gap: 20px;
+    align-content: baseline;
+    box-sizing: border-box;
+    height: 90%;
+    padding: 10px;
+    flex-basis: 100%;
+}
+
+
+.dashboard-wrapper{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-content: space-between;
+}
+
+.first-wrapper{
+    display: flex;
+    flex-direction: column;
+    flex-basis: 100%;
+    gap: 10px;
+    width: 60%;
+    border: 2px solid red;
+}
+
+.first-wrapper .dashboard{
+    
+    height: 20%;
+    width: 100%;
+    border: 1px solid black;
+    flex-basis: 30%;
+}
+
+.first-wrapper .dashboard1{
+    
+    height: 20%;
+    width: 100%;
+    border: 1px solid black;
+    flex-basis: 30%;
+}
+
+.first-wrapper .dashboard2{
+    
+    height: 20%;
+    width: 100%;
+    border: 1px solid black;
+    flex-basis: 40%;
+}
+
+.second-wrapper{
+    display: flex;
+    flex-direction: column;
+    flex-basis: 100%;
+    gap: 10px;
+    width: 35%;
+    border: 2px solid red;
+
+}
+
+.second-wrapper .dashboard{
+    
+    height: 20%;
+    width: 100%;
+    border: 1px solid black;
+    flex-basis: 50%;
+}
+
+.second-wrapper .dashboard1{
+    
+    height: 20%;
+    width: 100%;
+    border: 1px solid black;
+    flex-basis: 20%;
+}
+
+.second-wrapper .dashboard2{
+    
+    height: 20%;
+    width: 100%;
+    border: 1px solid black;
+    flex-basis: 30%;
+}
+
+
