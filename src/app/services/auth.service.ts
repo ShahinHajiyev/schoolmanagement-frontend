@@ -1,8 +1,8 @@
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injectable, NgModule, inject } from '@angular/core';
-import { CanActivateFn, ActivatedRouteSnapshot,  Router, CanActivateChildFn, ActivatedRoute, CanDeactivateFn, UrlTree, NavigationEnd, NavigationStart, RouterStateSnapshot } from '@angular/router';
+import { CanActivateFn, ActivatedRouteSnapshot, Router, CanActivateChildFn, ActivatedRoute, CanDeactivateFn, UrlTree, NavigationEnd, NavigationStart, RouterStateSnapshot } from '@angular/router';
 import { JwtHelperService } from '@auth0/angular-jwt';
-import { Observable, catchError, map, of, tap } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, catchError, map, of, tap } from 'rxjs';
 
 
 
@@ -23,26 +23,28 @@ export class AuthService {
   public isLogoutInProcess: boolean = false;
   adminRole: string = "ROLE_ADMIN";
 
-   currentPath: string | undefined;
+  currentPath: string | undefined;
   currentRoute: string = '';
 
-                                                        //the only problem remains is that admin route needs to be Guarded. // Looks like solved
+ 
+  private loaderSubject = new BehaviorSubject<boolean>(false);
+  loaderState = this.loaderSubject.asObservable();
 
   constructor(private http: HttpClient,
-    private jwtHelper: JwtHelperService,                                               
+    private jwtHelper: JwtHelperService,
     private activatedRoute: ActivatedRoute,
     private router: Router) {
 
-      this.router.events.subscribe((event) => {
-        if (event instanceof NavigationStart) {
-          this.currentRoute = event.url;
-        }
-      });
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationStart) {
+        this.currentRoute = event.url;
+      }
+    });
 
     this.activatedRoute.url.subscribe((segments) => {
-      
+
       this.currentPath = segments[0] ? segments[0].path : '';  //this one does not work
-      console.log("WHAT IS THE CURRENT PATH: " ,this.currentPath);
+      console.log("WHAT IS THE CURRENT PATH: ", this.currentPath);
     })
 
   }
@@ -63,12 +65,12 @@ export class AuthService {
 
   register(password: string, confirmPassword: string, neptunCode: string, email: string): Observable<any> {
     return this.http.post<any>(`${this.apiURL}/user/register`, { password, neptunCode, email })
-  }                                     
+  }
 
   logout(): void {
     this.isLogoutInProcess = true;
     localStorage.removeItem('auth-token');
-    this.isLoggedIn=false;
+    this.isLoggedIn = false;
   }
 
   completeLogout() {
@@ -97,27 +99,45 @@ export class AuthService {
     console.log("Auth service isAdmin() ")
     let isAdmin: boolean = false;
 
-    console.log("Auth-token ", this.getAuthToken() )
+    console.log("Auth-token ", this.getAuthToken())
 
     if (this.getAuthToken() != null) {
       console.log("Auth service IF isAdmin() ")
-    const token: any = this.getAuthToken();
-    const decodedToken: any = jwt_decode.jwtDecode(token)
-    let roleObjectFromToken = decodedToken.authorities.find((auth: { authority: string; }) => auth.authority === 'ROLE_ADMIN');
-    let roleFromToken = roleObjectFromToken ? roleObjectFromToken.authority : null;
+      const token: any = this.getAuthToken();
+      const decodedToken: any = jwt_decode.jwtDecode(token)
+      let roleObjectFromToken = decodedToken.authorities.find((auth: { authority: string; }) => auth.authority === 'ROLE_ADMIN');
+      let roleFromToken = roleObjectFromToken ? roleObjectFromToken.authority : null;
 
-    console.log("The role", roleFromToken)
-    
-    if (roleFromToken === adminRole) {
-      console.log("role=admin")
-      return isAdmin = true;
+      console.log("The role", roleFromToken)
+
+      if (roleFromToken === adminRole) {
+        console.log("role=admin")
+        return isAdmin = true;
+      }
     }
-  }
-  console.log("reole=user")
+    console.log("reole=user")
     return isAdmin;
   }
 
+  showSideBar() {
+    this.loaderSubject.next(true);
+    localStorage.setItem('isLoggedIn', "true");
+  }
+
+  getSideBarToken(){
+  return localStorage.getItem("isLoggedIn");
+  }
+
+  hideSideBar() {
+    console.log("Sidebar in authservice hided")
+    this.loaderSubject.next(false);
+    localStorage.removeItem("isLoggedIn");
+  }
+
+  
+
 }
+
 
 
 
@@ -125,7 +145,7 @@ export type CanDeactivateType = Observable<boolean | UrlTree> | Promise<boolean 
 
 
 export interface CanComponentDeactivate {
-  canDeactivate: (currentState: RouterStateSnapshot, next: RouterStateSnapshot) => CanDeactivateType ;
+  canDeactivate: (currentState: RouterStateSnapshot, next: RouterStateSnapshot) => CanDeactivateType;
 }
 
 export const canDeactivateGuard: CanDeactivateFn<CanComponentDeactivate> = (
@@ -133,14 +153,14 @@ export const canDeactivateGuard: CanDeactivateFn<CanComponentDeactivate> = (
   currentRoute: ActivatedRouteSnapshot,
   currentState: RouterStateSnapshot,
   next: RouterStateSnapshot): CanDeactivateType => {
-  
-    if (component.canDeactivate) {
-      return component.canDeactivate(currentState, next);
-    }
 
-    return true;
-
+  if (component.canDeactivate) {
+    return component.canDeactivate(currentState, next);
   }
+
+  return true;
+
+}
 
 export const canActivate: CanActivateFn = (
   route: ActivatedRouteSnapshot,
@@ -148,7 +168,8 @@ export const canActivate: CanActivateFn = (
 ) => {
   const authService = inject(AuthService);
   const router = inject(Router);
-  
+  const path = state.url;
+
 
 
   return authService.isLogged().pipe(
@@ -159,6 +180,7 @@ export const canActivate: CanActivateFn = (
 
 
         const token = localStorage.getItem('auth-token');
+        
         let currentUrl = router.url;
         let nextPath = authService.currentRoute;
         console.log("Current url", currentUrl)
@@ -166,8 +188,9 @@ export const canActivate: CanActivateFn = (
         console.log("MAVIGATED--------- path", nextPath)
         //let isItAdmin: boolean  = this.isAdmin();
 
-         
-                                                                                  
+
+
+
         if (token) {
           const decodedToken: any = jwt_decode.jwtDecode(token)
           const currentTime = Math.floor(Date.now() / 1000);
@@ -179,13 +202,14 @@ export const canActivate: CanActivateFn = (
             return false;
           }
 
-          if(authService.isAdmin(authService.adminRole) != true && state.url.includes('/admin') ){
+          if (authService.isAdmin(authService.adminRole) != true && state.url.includes('/admin')) {
             console.log("Can activate adminrole")
             router.navigate(['course'])
             return false;
-          } 
+          }
         }
 
+      
         return true;
       }
 
@@ -201,7 +225,7 @@ export const canActivate: CanActivateFn = (
       router.navigate(['/login']);
       return of(false);
     })
-  )  
+  )
 };
 
 export const canActivateChild: CanActivateChildFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => canActivate(route, state);

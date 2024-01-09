@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, OnInit } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { ReactiveFormsModule } from '@angular/forms';
 
@@ -11,6 +11,10 @@ import { AuthInterceptor } from './services/auth.interceptor';
 import { CourseComponent } from './components/course/course.component';
 import { JWT_OPTIONS, JwtHelperService } from '@auth0/angular-jwt';
 import { AdminComponent } from './components/admin/admin.component';
+import { DashboardComponent } from './components/dashboard/dashboard.component';
+import { AuthService } from './services/auth.service';
+import { Observable } from 'rxjs';
+import { SidebarComponent } from './components/sidebar/sidebar.component';
 
 
 
@@ -20,7 +24,9 @@ import { AdminComponent } from './components/admin/admin.component';
     AppComponent,
     LoginComponent,
     CourseComponent,
-    AdminComponent
+    AdminComponent,
+    DashboardComponent,
+    SidebarComponent
   ],
   imports: [
     BrowserModule,
@@ -32,8 +38,11 @@ import { AdminComponent } from './components/admin/admin.component';
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     { provide: JWT_OPTIONS, useValue: {} },
-    JwtHelperService
+    JwtHelperService,
+    AuthService
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule{
+  
+ }
