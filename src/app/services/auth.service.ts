@@ -1,13 +1,14 @@
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { Injectable, NgModule, inject } from '@angular/core';
 import { CanActivateFn, ActivatedRouteSnapshot, Router, CanActivateChildFn, ActivatedRoute, CanDeactivateFn, UrlTree, NavigationEnd, NavigationStart, RouterStateSnapshot } from '@angular/router';
 import { JwtHelperService } from '@auth0/angular-jwt';
-import { BehaviorSubject, Observable, Subject, catchError, map, of, tap } from 'rxjs';
+import { BehaviorSubject, EMPTY, Observable, Subject, catchError, map, of, tap, throwError } from 'rxjs';
 
 
 
 
 import * as jwt_decode from 'jwt-decode';
+import { LoginComponent } from '../components/login/login.component';
 
 
 
@@ -22,9 +23,11 @@ export class AuthService {
   private isLoggedIn: boolean = false;
   public isLogoutInProcess: boolean = false;
   adminRole: string = "ROLE_ADMIN";
+  errorStatusCode: any; // Initialize the error status code property
 
   currentPath: string | undefined;
   currentRoute: string = '';
+  neptunCode!: string;
 
  
   private loaderSubject = new BehaviorSubject<boolean>(false);
@@ -34,6 +37,7 @@ export class AuthService {
     private jwtHelper: JwtHelperService,
     private activatedRoute: ActivatedRoute,
     private router: Router) {
+
 
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationStart) {
@@ -50,7 +54,36 @@ export class AuthService {
   }
 
 
+
+
+  public handleError(error?: HttpErrorResponse) : Observable<any> {
+    let eMessage = "";
+    if (error) {
+
+    //this.errorStatusCode = error;
+    //console.log("ErrorStatusCode" ,this.errorStatusCode.status);
+    
+    if (error.status === 0) {
+      // A client-side or network error occurred. Handle it accordingly.
+      console.error('An error occurred:', error.error);
+    } else 
+      // The backend returned an unsuccessful response code.
+      // The response body may contain clues as to what went wrong.
+      console.error(
+        `Backend returned code ${error.status}, body was: `, error.error);
+        
+      }
+        
+        // Return an observable with a user-facing error message.
+    //return throwError(() => new Error(error.error));
+    return throwError(() => error);
+  }  
+  
+    
   login(neptunCode: string, password: string): Observable<HttpResponse<any>> {
+    if (this.getAuthToken != null) {
+      localStorage.removeItem('auth-token');
+    }
     return this.http.post<any>(`${this.apiURL}/login`, { neptunCode, password }, { observe: 'response' })
       .pipe(
         tap((response: HttpResponse<any>) => {
@@ -59,11 +92,16 @@ export class AuthService {
             // Store the token in local storage or wherever needed
             localStorage.setItem('auth-token', token || 'nothing');
           }
-        })
+        }),
+
+        catchError(this.handleError)
+        
+        
+        
       );
   }
 
-  register(password: string, confirmPassword: string, neptunCode: string, email: string): Observable<any> {
+  register(password: string, _confirmPassword: string, neptunCode: string, email: string): Observable<any> {
     return this.http.post<any>(`${this.apiURL}/user/register`, { password, neptunCode, email })
   }
 
@@ -95,6 +133,7 @@ export class AuthService {
     return of(this.isLoggedIn);
   }
 
+
   isAdmin(adminRole: string): boolean {
     console.log("Auth service isAdmin() ")
     let isAdmin: boolean = false;
@@ -107,6 +146,11 @@ export class AuthService {
       const decodedToken: any = jwt_decode.jwtDecode(token)
       let roleObjectFromToken = decodedToken.authorities.find((auth: { authority: string; }) => auth.authority === 'ROLE_ADMIN');
       let roleFromToken = roleObjectFromToken ? roleObjectFromToken.authority : null;
+      
+      console.log("asdaaaaaaaaaaaaaaaaaa", decodedToken , "asdaaaaaaaaaaaaa")
+   
+
+      
 
       console.log("The role", roleFromToken)
 
@@ -134,7 +178,15 @@ export class AuthService {
     localStorage.removeItem("isLoggedIn");
   }
 
+  activateAccount(activationCode : String, neptunCode : string) : Observable<any>{
+        return this.http.post<any>(`${this.apiURL}/user/activate`, {activationCode, neptunCode}, {observe: 'response'}).pipe(
+          catchError(this.handleError)
+        )
+  }
+
   
+
+
 
 }
 
@@ -150,7 +202,7 @@ export interface CanComponentDeactivate {
 
 export const canDeactivateGuard: CanDeactivateFn<CanComponentDeactivate> = (
   component: CanComponentDeactivate,
-  currentRoute: ActivatedRouteSnapshot,
+  _currentRoute: ActivatedRouteSnapshot,
   currentState: RouterStateSnapshot,
   next: RouterStateSnapshot): CanDeactivateType => {
 
@@ -172,6 +224,7 @@ export const canActivate: CanActivateFn = (
 
 
 
+   console.log(state, "STATE")
   return authService.isLogged().pipe(
     map((loggedIn) => {
       if (loggedIn) {
@@ -186,9 +239,6 @@ export const canActivate: CanActivateFn = (
         console.log("Current url", currentUrl)
         console.log("Current path", authService.currentPath)
         console.log("MAVIGATED--------- path", nextPath)
-        //let isItAdmin: boolean  = this.isAdmin();
-
-
 
 
         if (token) {
@@ -213,15 +263,23 @@ export const canActivate: CanActivateFn = (
         return true;
       }
 
-      else {
-        router.navigate(['/login']);
-        return false;
-      }
+        else if(!loggedIn && state.root.queryParamMap.get('status') === '409'){
+             
+        
+        
+             console.log("asdasdASDASDasdASDASDASDASDASD");
+           return true;
+         }
 
+      
+        router.navigate(['/login']);
+        console.log("I am coming to else in loggedin")
+        return false;
     }
 
     ),
-    catchError(() => {
+    catchError( () => {
+ 
       router.navigate(['/login']);
       return of(false);
     })

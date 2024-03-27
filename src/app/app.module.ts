@@ -6,7 +6,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { LoginComponent } from './components/login/login.component';
 import { FormsModule } from '@angular/forms'
-import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule, HttpErrorResponse } from '@angular/common/http';
 import { AuthInterceptor } from './services/auth.interceptor';
 import { CourseComponent } from './components/course/course.component';
 import { JWT_OPTIONS, JwtHelperService } from '@auth0/angular-jwt';
@@ -15,6 +15,8 @@ import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { AuthService } from './services/auth.service';
 import { Observable } from 'rxjs';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
+import { LoginValidatorComponent } from './components/login-validator/login-validator.component';
+
 
 
 
@@ -26,7 +28,8 @@ import { SidebarComponent } from './components/sidebar/sidebar.component';
     CourseComponent,
     AdminComponent,
     DashboardComponent,
-    SidebarComponent
+    SidebarComponent,
+    LoginValidatorComponent
   ],
   imports: [
     BrowserModule,

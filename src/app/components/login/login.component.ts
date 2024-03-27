@@ -1,8 +1,9 @@
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { AuthService, CanComponentDeactivate, CanDeactivateType } from 'src/app/services/auth.service';
 import { FormGroup, Validators, FormControl } from '@angular/forms';
-import { Subscription, async, map, mapTo, take, tap } from 'rxjs';
-import { Router } from '@angular/router';
+import { Subscription, async, map, mapTo, take, tap, throwError } from 'rxjs';
+import { NavigationExtras, Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 
 
 
@@ -17,6 +18,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   showLogin: boolean = true;
   showRegister: boolean = false;
   adminRole: string = "ROLE_ADMIN";
+  errorStatus : any;
 
 
 
@@ -74,6 +76,10 @@ export class LoginComponent implements OnInit, OnDestroy {
     })
   }
 
+  
+
+
+
   login(): void {
     this.authService.login(this.loginForm.value.neptunCode, this.loginForm.value.password)
       .pipe(
@@ -89,22 +95,51 @@ export class LoginComponent implements OnInit, OnDestroy {
         
       )
       .subscribe({
+        
+        error: (e) =>  {
+          this.errorStatus = e.status;
+        
+       
+          console.log("LoginComponent error status", this.errorStatus)
+          if (this.errorStatus === 409) {
+          this.setNeptunCode = this.loginForm.value.neptunCode;
+          console.log(this.setNeptunCode)
+            console.log("yes here ")
+           this.router.navigate(['/login-validator'],
+            { queryParams: { status: this.errorStatus} });
 
-        error: (e) => console.error("Wrong credentials", e)
+            
+          }
+          console.error('This is an error: ', e) 
 
+         
+        
+        }
       }
       );
-
   }
+
+  set setNeptunCode(neptunCode : string) {
+    this.authService.neptunCode = neptunCode;
+}
+
+test(){
+  const navigationExtras: NavigationExtras = {state: {example: 'This is an example'}};
+    this.router.navigate(['/login-validator'], navigationExtras);
+}
+
+
   register() {
     this.authService.register(this.registrationForm.value.password,
       this.registrationForm.value.confirmPassword,
       this.registrationForm.value.neptunCode,
       this.registrationForm.value.email).subscribe(() => {
-        if (this.registrationForm.value.password === this.registrationForm.value.confirmPassword) {
-          console.log('Registration successful');
-        } else {
-          console.error('Passwords do not match');
+        if (this.registrationForm.value.password !== this.registrationForm.value.confirmPassword) {
+          console.log('Passwords do not match');
+        } 
+        else {
+          console.log("Registration is successful");
+          this.router.navigate([''])
         }
       }
       );

@@ -37,10 +37,9 @@
       <button class="inputbox" type="submit" [disabled]="!registrationForm.valid">Register</button>
     </form>
     <div class="buttons">
-      <a href="#" *ngIf="showLogin" [hidden] >Forgot password</a>
+      <a href="#" *ngIf="showLogin" [hidden]>Forgot password</a>
       <button (click)="showLoginForm()" *ngIf="showRegister" [hidden] id="showlogin">Login</button>
       <button (click)="showRegisterForm()" *ngIf="showLogin" [hidden]>Register</button>
-      
     </div>
   </div>
 </div>

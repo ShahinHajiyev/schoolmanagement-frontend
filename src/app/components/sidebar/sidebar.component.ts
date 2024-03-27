@@ -19,7 +19,7 @@ export class SidebarComponent implements OnInit, OnDestroy, DoCheck {
   ngDoCheck(): void {
     const loggedInValue =  localStorage.getItem("isLoggedIn");
     this.loggedIn = loggedInValue === "true";
-    console.log("ngDoCheck loaded")
+     console.log("ngDoCheck loaded")
   } 
 
 

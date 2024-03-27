@@ -1,0 +1,13 @@
+
+<div class="validator-container">
+    <div class="validate-box">
+        <form (ngSubmit)="activateAccount()" [formGroup]="activationForm">
+            <h2>Activate</h2>
+            <br>
+            <input type="text" id="activationCode" formControlName="activationCode">
+            <button class="clearButton">Clear</button>
+            <button class="activationButton">Activate</button>
+        </form>
+
+    </div>
+</div>
