@@ -8,7 +8,7 @@
 
 .search-bar-row{
     display: flex;
-    padding: 10px;
+    padding: 5px;
     justify-content: space-between;
     align-items: flex-end;
     flex: 100%;
@@ -17,7 +17,6 @@
 
 .search-box{
     height: 50px;
-    width: 100px;
     flex: 50%;
 }
 
@@ -36,8 +35,7 @@ li {
 }
 
 .dashboard-wrapper{
-    display: flex;
-    justify-content: space-between;
+
     align-items: baseline;
     flex-flow: column wrap;
     gap: 20px;
@@ -62,7 +60,6 @@ li {
     flex-basis: 100%;
     gap: 10px;
     width: 60%;
-    border: 2px solid red;
 }
 
 .first-wrapper .dashboard{
@@ -95,7 +92,6 @@ li {
     flex-basis: 100%;
     gap: 10px;
     width: 35%;
-    border: 2px solid red;
 
 }
 
