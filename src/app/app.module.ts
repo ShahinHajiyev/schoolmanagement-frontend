@@ -16,6 +16,8 @@ import { AuthService } from './services/auth.service';
 import { Observable } from 'rxjs';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { LoginValidatorComponent } from './components/login-validator/login-validator.component';
+import { EnrollmentComponent } from './components/enrollment/enrollment.component';
+
 
 
 
@@ -29,7 +31,8 @@ import { LoginValidatorComponent } from './components/login-validator/login-vali
     AdminComponent,
     DashboardComponent,
     SidebarComponent,
-    LoginValidatorComponent
+    LoginValidatorComponent,
+    EnrollmentComponent
   ],
   imports: [
     BrowserModule,
