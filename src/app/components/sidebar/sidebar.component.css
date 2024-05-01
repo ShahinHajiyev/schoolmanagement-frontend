@@ -12,15 +12,11 @@
 ul{
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    justify-content: space-evenly;
+    align-items: normal;
     align-content: center;
     list-style: none;
-}
-
-li{
-    font-size: 50px;
-    
+    height: 100vh;
 }
 
 .logo{
@@ -29,4 +25,21 @@ li{
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+
+li {
+    font-size: 1.5em; /* Adjust the base font size */
+}
+
+@media (max-width: 768px) {
+    li {
+        font-size: 1.5em; /* Adjust font size for smaller screens */
+    }
+}
+
+@media (max-width: 480px) {
+    li {
+        font-size: 1em; /* Adjust font size for even smaller screens */
+    }
 }
