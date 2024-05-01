@@ -1,0 +1,32 @@
+.course-container{
+
+    
+    
+}
+
+.courses{
+    display: flex;
+    justify-content: unset;
+    align-content: space-around;
+    align-items: center;
+    flex-flow: row wrap;
+    height: 100vh;
+    box-sizing: border-box;
+    padding: 1em;
+    row-gap: 5px;
+    column-gap: 5px;
+    overflow: auto;
+}
+
+.items {
+    
+    width: 24vw;
+    height: 15vh;
+    border: 1px solid black;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+    flex-wrap: wrap ;
+    font-size: small;
+    
+}

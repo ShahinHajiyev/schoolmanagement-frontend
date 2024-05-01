@@ -1,12 +1,19 @@
+<div class="course-container">
+  <div class="courses">
 
-  <ul>
-    <li *ngFor="let object of courses">
+
+    <div class="items" *ngFor="let course of courses">
       <!-- Display object properties -->
-      <p>ID: {{ object.courseId }}</p>
-      <p>Name: {{ object.courseName }}</p>
-      <p>Description: {{ object.credit }}</p>
+      <div>ID: {{ course.courseId }}</div>
+      <div>Name: {{ course.courseName }}</div>
+      <div>Description: {{ course.credit }}</div>
+      <div>Semester: {{course.semester.id}}</div>
       <!-- Add more properties as needed -->
-      <a routerLink="/login">Login</a>
-    </li>
-  </ul>
-  <button (click)="logout()">LOGOUT</button>
+    </div>
+  
+  
+    <button (click)="logout()">LOGOUT</button>
+  </div>
+</div>
+
+
