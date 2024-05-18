@@ -1,1 +1,66 @@
-<p>enrollment works!</p>
+<div class="enrollment-container">
+
+    <div class="course-table">
+
+
+        <h2>Available courses</h2>
+        <br>
+        <div class="courses">
+            <table>
+                <thead class="table-head">
+                    <tr>
+                        <th>Courses</th>
+                        <th>Semester</th>
+                        <th>Credit</th>
+                        <th>Courses</th>
+                        <th>Registration</th>
+                    </tr>
+                </thead>
+
+                <tbody *ngFor="let courses of availableCourses; let i = index">
+                    <tr>
+                        <td class="course-names" routerLink="/course">{{courses.courseName}}</td>
+                        <td>{{courses.semester.id}}</td>
+                        <td>{{courses.credit}}</td>
+                        <td>{{courses.semester.id}}</td>
+                        <td class="register-dropdown">
+                            <button type="button" id="dropDownButton" class="dropdown-button"
+                                (click)="toggleDropdown(i)">+</button>
+                            <div class="dropdown-content" *ngIf="dropdownStates[i]">
+                                <a *ngFor="let dropdown of dropdowns">
+                                    {{dropdown}}
+                                </a>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+                </tbody>
+
+            </table>
+
+
+
+
+
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </div>
+    </div>
+
+</div>
