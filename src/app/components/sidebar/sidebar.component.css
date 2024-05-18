@@ -9,10 +9,15 @@
     background-color: blue;
 }
 
+button {
+    height: 100%;
+    width: 100%;
+}
+
 ul{
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
+    justify-content: flex-start;
     align-items: normal;
     align-content: center;
     list-style: none;

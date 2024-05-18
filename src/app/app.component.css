@@ -1,25 +1,31 @@
-* {
+* , html{
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     background-color: #f0f0f0;
+    
   }
 
 .main-container{
+    height: 100vh;
     display: flex;
+    overflow-y:hidden;
+   
 }
 
 .sidebar{
     width: 15%;
     background-color: #f0f0f0;
-    height: 100vh;
+    overflow-x:unset;
+    overflow-y:visible;
 }
 
 
 .router-container{
-    flex-basis: 100%;
+    flex-basis: 80%;
     padding-left: 3%;
     background-color: #f0f0f0;
+    overflow-y: auto;
 }
 
 
