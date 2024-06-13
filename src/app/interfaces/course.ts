@@ -6,7 +6,7 @@ export interface Course {
     courseId: number;
     courseName: string;
     credit: number;
-    //teacher: Teacher;
+    teacher: Teacher;
     //enrollments: Enrollment[];
     semester : Semester
 }

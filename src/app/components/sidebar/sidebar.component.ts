@@ -1,5 +1,6 @@
 import { Component, DoCheck, OnChanges, OnDestroy, OnInit, inject } from '@angular/core';
 import { ActivatedRouteSnapshot, ResolveFn, RouterStateSnapshot } from '@angular/router';
+import { JwtHelperService } from '@auth0/angular-jwt';
 import { Subscription, tap } from 'rxjs';
 import { Menu } from 'src/app/interfaces/menu';
 import { AuthService } from 'src/app/services/auth.service';
@@ -14,18 +15,23 @@ export class SidebarComponent implements OnInit, OnDestroy, DoCheck {
 
   
 
-  constructor(private sidebarService:SidebarService){}
+  constructor(private sidebarService:SidebarService,
+              private authService : AuthService
+  ){}
 
   menuItems : Menu[] = [];
   loggedIn = false;
   isInitiated = false;
+  isExp = false;
 
   
   ngDoCheck(): void {
     const loggedInValue =  localStorage.getItem("isLoggedIn");
     this.loggedIn = loggedInValue === "true";
+    
+    console.log("LOG", this.isExp)
     // console.log("ngDoCheck loaded")
-     if (this.loggedIn && !this.isInitiated){
+     if (this.loggedIn && !this.isInitiated && !this.isExp){
       console.log("ISINITIATED IS FALSE")
       this.getMenu();
       this.isInitiated = true;
@@ -46,11 +52,17 @@ export class SidebarComponent implements OnInit, OnDestroy, DoCheck {
   
   }
 
+  tokenExpired(){
+    return this.authService.isTokenExpired().subscribe((data) => {
+      this.isExp = data;
+    });
+  }
+
 
   ngOnDestroy() {
     console.log("I am now in the ngOnDestroy of sidebar")
     this.isInitiated = false;
-    
+    localStorage.removeItem('auth-token');
   }
 
   getMenu():void{
