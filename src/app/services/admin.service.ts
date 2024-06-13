@@ -13,8 +13,8 @@ export class AdminService {
   constructor(private http: HttpClient,
               private authService: AuthService) { }
 
-addStudent(neptunCode: string, email: string): Observable<any>{
-   return this.http.post<any>(`${this.apiURL}/admin/addStudentByAdmin`, {neptunCode, email});
+addStudent(neptunCode: string, email: string, selectedUser: string): Observable<any>{
+   return this.http.post<any>(`${this.apiURL}/admin/addStudentByAdmin`, {neptunCode, email, selectedUser});
 }
 
 

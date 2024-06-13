@@ -1,5 +1,3 @@
-<h1>THIS IS ADMIN PAGE</h1>
-
 <form (ngSubmit)="addStudent()" [formGroup]="studentForm">
     <div class="neptunCode">
         <label for="neptunCode">Neptun Code</label>
@@ -9,10 +7,33 @@
         <label for="email">Email</label>
         <input type="text" name="email" id="email" formControlName="email">
     </div>
+    <div class="dropdown">
+        <label for="selectedUser">Choose a user</label>
+<br>
+        <select name="selectedUser" formControlName="selectedUser" (change)="toggleDropdown($event)" class="">
+            <option>--Select--</option>
+            <option [value]="dropdown.value" *ngFor="let dropdown of dropdowns">{{dropdown.value}}</option>
+        </select>
+    </div>
 
-    <button (click)="logout()">Logout</button>
+
+
+    <br>
+    <button type="button" (click)="logout()">Logout</button>
 
     <button>Add Student</button>
 
 
 </form>
+
+
+
+
+<!--    <div class="dropdown">
+        <button type="button" class="dropdown-button" (click)="toggleDropdown()">Select User</button>
+        <div class="dropdown-content" *ngIf="isDropdownOpen">
+            <p *ngFor="let dropdown of dropdowns">
+                {{dropdown.value}}
+            </p>
+        </div>
+    </div>-->
