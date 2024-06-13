@@ -1,0 +1,13 @@
+.register-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 500px;
+    height: fit-content;
+    border: 1px solid black;
+}
+
+.register-container{
+
+}

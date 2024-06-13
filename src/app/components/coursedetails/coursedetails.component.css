@@ -1,0 +1,40 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+.tabs {
+    display: flex;
+    gap: 1px;
+    flex-wrap: wrap;
+}
+
+button {
+    min-height: 2em;
+    width: fit-content;
+}
+
+.container {
+    width: 90%;
+    margin: 0 auto;
+}
+
+.tab-content {
+    margin-top: 20px;
+    border: 1px solid black;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th,
+td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+th {
+    background-color: #f2f2f2;
+}

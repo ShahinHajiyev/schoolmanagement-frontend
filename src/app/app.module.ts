@@ -17,6 +17,8 @@ import { Observable } from 'rxjs';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { LoginValidatorComponent } from './components/login-validator/login-validator.component';
 import { EnrollmentComponent } from './components/enrollment/enrollment.component';
+import { RegistercoursesComponent } from './components/registercourses/registercourses.component';
+import { CoursedetailsComponent } from './components/coursedetails/coursedetails.component';
 
 
 
@@ -32,7 +34,9 @@ import { EnrollmentComponent } from './components/enrollment/enrollment.componen
     DashboardComponent,
     SidebarComponent,
     LoginValidatorComponent,
-    EnrollmentComponent
+    EnrollmentComponent,
+    RegistercoursesComponent,
+    CoursedetailsComponent
   ],
   imports: [
     BrowserModule,

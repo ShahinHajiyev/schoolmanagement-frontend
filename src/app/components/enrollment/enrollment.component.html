@@ -19,7 +19,7 @@
 
                 <tbody *ngFor="let courses of availableCourses; let i = index">
                     <tr>
-                        <td class="course-names" routerLink="/course">{{courses.courseName}}</td>
+                        <td class="course-names" [routerLink]="[dropdowns[1].route, courses.courseId]">{{courses.courseName}}</td>
                         <td>{{courses.semester.id}}</td>
                         <td>{{courses.credit}}</td>
                         <td>{{courses.semester.id}}</td>
@@ -27,8 +27,8 @@
                             <button type="button" id="dropDownButton" class="dropdown-button"
                                 (click)="toggleDropdown(i)">+</button>
                             <div class="dropdown-content" *ngIf="dropdownStates[i]">
-                                <a *ngFor="let dropdown of dropdowns">
-                                    {{dropdown}}
+                                <a *ngFor="let dropdown of dropdowns" [routerLink]="[dropdown.route, courses.courseId]">
+                               {{dropdown.value}}
                                 </a>
 
                             </div>
@@ -42,24 +42,7 @@
 
             </table>
 
-
-
-
-
-            
-
-
-
-
-
-
-
-
-
-
-
-
-
+ 
         </div>
     </div>
 

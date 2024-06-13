@@ -1,0 +1,78 @@
+
+<div class="container">
+    <h1>Course details</h1>
+    <div class="tabs">
+        <button *ngFor="let tab of tabs" (click)="selectTab(tab.id)">
+            {{ tab.title }}
+        </button>
+    </div>
+    <div class="tab-content" [ngSwitch]="selectedTabId">
+
+        <div *ngSwitchCase="'basicData'">  
+            
+            <h2>Basic data (INBGA9989E)</h2>
+            <p><strong>Code:</strong> INBGA9989E</p>
+            <p><strong>Subject name:</strong>{{course.courseName}} </p>
+            <p><strong>Exam type:</strong> Online written exam and oral exam; Online written exam; Online oral exam</p>
+            <p><strong>Minimum headcount:</strong> 0</p>
+            <p><strong>Maximum headcount:</strong> 999</p>
+            <p><strong>Max. number of waiting-list:</strong> 0</p>
+            <p><strong>Language:</strong> English</p>
+            <p><strong>Term:</strong> 2020/21/2</p>
+            <p><strong>Course type:</strong> Theoretical</p>
+            <p><strong>Course price:</strong></p>
+            <p><strong>Class schedule information:</strong> W:08:00-10:00(IK-TEOKJ fszt. 108. (IV.ea.) )</p>
+            <p><strong>Lecturer:</strong> {{course.teacher.firstName}} {{course.teacher.lastName}}</p>
+            <p><strong>Internet address:</strong> KepzesLetezik("IKBN_PTI_angol") VAGY KepzesLetezik("IKBN_MI_angol") VAGY KepzesLetezik("IKBN_GI_angol")</p>
+            <p><strong>Preliminary requirement:</strong> KepzesLetezik("IKBN_PTI_angol") VAGY KepzesLetezik("IKBN_MI_angol") VAGY KepzesLetezik("IKBN_GI_angol")</p>
+            <p><strong>Course type identifier:</strong> Normal</p>
+            <p><strong>Classes per week:</strong> 2</p>
+            <p><strong>Classes per term:</strong> 0</p>
+            <button>More class schedule information</button>
+            <h3>Subjects belonging to the course</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Subject code</th>
+                        <th>Subject name</th>
+                        <th>Type of subject requirement</th>
+                        <th>Organizational unit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>INBGA9989-17</td>
+                        <td>Business Etiquette</td>
+                        <td>Exam</td>
+                        <td>IKTO - Education Office</td>
+                    </tr>
+                    <tr>
+                        <td>INBGA9989-17</td>
+                        <td>Business Etiquette</td>
+                        <td>Exam</td>
+                        <td>IKTO - Education Office</td>
+                    </tr>
+                    <tr>
+                        <td>INBMA9989-17</td>
+                        <td>Business Etiquette</td>
+                        <td>Exam</td>
+                        <td>IKTO - Education Office</td>
+                    </tr>
+                    <tr>
+                        <td>INFJVA1-K3</td>
+                        <td>Business Etiquette</td>
+                        <td>Exam</td>
+                        <td>IKTO - Education Office</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div *ngSwitchCase="'students'">
+            <h2>asdasd1weeasdcax</h2>
+        </div>
+
+
+    </div>
+</div>
+

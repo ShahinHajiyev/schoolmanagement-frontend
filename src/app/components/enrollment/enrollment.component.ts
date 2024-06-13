@@ -1,4 +1,5 @@
 import { Component, HostListener, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { tap } from 'rxjs';
 import { Course } from 'src/app/interfaces/course';
 import { Testdropdown } from 'src/app/interfaces/testdropdown';
@@ -12,14 +13,20 @@ import { EnrollmentService } from 'src/app/services/enrollment.service';
 })
 export class EnrollmentComponent implements OnInit{
 
+  dropdowns = [
+    { key: '1', value: 'Register', route: '/register' },
+    { key: '2', value: 'Course details', route: '/courseDetails' },
+    { key: '3', value: 'Message to the lecturer', route: '/dashboard' }
+  ];
+
   availableCourses: Course[] = [];
-  dropdowns : Testdropdown[] = [];
   dropdownStates: boolean[] = [];
   openedByButton: boolean = false;
   indexOfDropdown: number = 0;
 
   constructor(private courseService: CourseService,
-    private enrollmentService: EnrollmentService
+    private enrollmentService: EnrollmentService,
+    private router: Router
   ){
     this.dropdownStates = new Array(this.dropdowns.length).fill(false);
   }
@@ -49,7 +56,7 @@ export class EnrollmentComponent implements OnInit{
     
     this.dropdownStates[index] = !this.dropdownStates[index];
     console.log("dropdown states", this.dropdownStates)
-    this.getDropdowns();
+    //this.getDropdowns();
     console.log("index", index);
     console.log("state",this.dropdownStates[index]);
     
@@ -83,19 +90,5 @@ export class EnrollmentComponent implements OnInit{
   }
 
 
-  getDropdowns(){
-    return this.enrollmentService.getDropdown().pipe(tap((data) => {
-      if (data) {
-        
-        this.dropdowns = data;
-        
-        console.log("dropdown states", this.dropdownStates)
-        console.log(this.dropdowns)
-      }
-    }
-    
-    
-    )).subscribe();
-    
-  }
+
 }
