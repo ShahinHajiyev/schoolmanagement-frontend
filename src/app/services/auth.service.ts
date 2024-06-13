@@ -9,6 +9,8 @@ import { BehaviorSubject, EMPTY, Observable, Subject, catchError, map, of, tap, 
 
 import * as jwt_decode from 'jwt-decode';
 import { LoginComponent } from '../components/login/login.component';
+import { Menu } from '../interfaces/menu';
+import { LocalStorageService } from './local-storage.service';
 
 
 
@@ -36,7 +38,8 @@ export class AuthService {
   constructor(private http: HttpClient,
     private jwtHelper: JwtHelperService,
     private activatedRoute: ActivatedRoute,
-    private router: Router) {
+    private router: Router,
+    private locaStorageService: LocalStorageService) {
 
 
     this.router.events.subscribe((event) => {
@@ -78,6 +81,9 @@ export class AuthService {
     //return throwError(() => new Error(error.error));
     return throwError(() => error);
   }  
+
+  
+
   
     
   login(neptunCode: string, password: string): Observable<HttpResponse<any>> {
@@ -90,7 +96,8 @@ export class AuthService {
           const token = response.headers.get('Authorization');
           if (token) {
             // Store the token in local storage or wherever needed
-            localStorage.setItem('auth-token', token || 'nothing');
+            //localStorage.setItem('auth-token', token || 'nothing');
+            this.locaStorageService.set('auth-token', token || 'nothing', 2)
           }
         }),
 
@@ -116,15 +123,28 @@ export class AuthService {
   }
 
   getAuthToken(): string | null {
-    return localStorage.getItem('auth-token');
+    //return localStorage.getItem('auth-token');
+    return this.locaStorageService.get('auth-token');
   }
 
 
   isTokenExpired(): Observable<boolean> {
+    let isExpired = false;
     const token = this.getAuthToken();
 
-    return of(this.jwtHelper.isTokenExpired(token));
+    if (token) {
+      const decodedToken: any = jwt_decode.jwtDecode(token)
+      const currentTime = Math.floor(Date.now() / 1000);
+
+      
+
+      if (decodedToken.exp && decodedToken.exp < currentTime) {
+        this.router.navigate(['login']);
+        isExpired =  true;
+      }
   }
+  return of(isExpired);
+}
 
   isLogged(): Observable<boolean> {
     if (this.getAuthToken() != null) {
@@ -146,8 +166,9 @@ export class AuthService {
       const decodedToken: any = jwt_decode.jwtDecode(token)
       let roleObjectFromToken = decodedToken.authorities.find((auth: { authority: string; }) => auth.authority === 'ROLE_ADMIN');
       let roleFromToken = roleObjectFromToken ? roleObjectFromToken.authority : null;
+      const userId = decodedToken.sub;
+      console.log("The SubJECT " , userId);
       
-      console.log("asdaaaaaaaaaaaaaaaaaa", decodedToken , "asdaaaaaaaaaaaaa")
    
 
       
@@ -182,6 +203,18 @@ export class AuthService {
         return this.http.post<any>(`${this.apiURL}/user/activate`, {activationCode, neptunCode}, {observe: 'response'}).pipe(
           catchError(this.handleError)
         )
+  }
+
+  decodeToken(){
+    const token = localStorage.getItem("auth-token");
+    const decodedToken = jwt_decode.jwtDecode(token);
+    return decodedToken;
+  }
+
+  geLoggedUser():Observable<any>{
+    const user = this.decodeToken().sub;
+    console.log("LOGGED_USER", user)
+    return of(user);
   }
 
   
