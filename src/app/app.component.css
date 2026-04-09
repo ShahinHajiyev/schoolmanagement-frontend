@@ -13,11 +13,8 @@
 }
 
 .sidebar{
-    width: 15%;
-    bottom:0;
-    background-color: white;
-    overflow-x:unset;
-    overflow-y:visible;
+    width: 240px;
+    flex-shrink: 0;
 }
 
 

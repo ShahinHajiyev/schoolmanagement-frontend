@@ -1,50 +1,157 @@
-.nav{
-    height: 100vh;
-    background-color: red;
-    flex-basis: 9%;
-    
+/* ── Layout ─────────────────────────────────────────────────── */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 240px;
+  background-color: #1e293b;
+  color: #94a3b8;
+  flex-shrink: 0;
+  overflow: hidden;
 }
 
-.nav-background{
-    background-color: blue;
+/* ── Brand header ───────────────────────────────────────────── */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-button {
-    height: 100%;
-    width: 100%;
+.brand-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background-color: #3b82f6;
+  border-radius: 8px;
+  color: #fff;
+  flex-shrink: 0;
 }
 
-ul{
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: normal;
-    align-content: center;
-    list-style: none;
-    height: 100vh;
+.brand-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f8fafc;
+  letter-spacing: 0.5px;
 }
 
-.logo{
-    height: 10%;
-    font-size: 2.5em;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+/* ── Navigation list ────────────────────────────────────────── */
+.sidebar-nav {
+  list-style: none;
+  padding: 12px 10px;
+  margin: 0;
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
 }
 
-
-li {
-    font-size: 1.5em; /* Adjust the base font size */
+.sidebar-nav::-webkit-scrollbar {
+  display: none;
 }
 
-@media (max-width: 768px) {
-    li {
-        font-size: 1.5em; /* Adjust font size for smaller screens */
-    }
+/* ── Nav item ───────────────────────────────────────────────── */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #94a3b8;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  margin-bottom: 2px;
+  border-left: 3px solid transparent;
 }
 
-@media (max-width: 480px) {
-    li {
-        font-size: 1em; /* Adjust font size for even smaller screens */
-    }
+.nav-item:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+}
+
+.nav-item.active {
+  background-color: rgba(59, 130, 246, 0.15);
+  color: #f8fafc;
+  border-left-color: #3b82f6;
+}
+
+.nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.nav-item.active .nav-icon,
+.nav-item:hover .nav-icon {
+  opacity: 1;
+}
+
+.nav-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Footer ─────────────────────────────────────────────────── */
+.sidebar-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  gap: 8px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #3b82f6;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.user-name {
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.logout-btn:hover {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #f87171;
 }
