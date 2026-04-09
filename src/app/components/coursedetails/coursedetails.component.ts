@@ -1,71 +1,125 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { take, tap } from 'rxjs';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { switchMap, takeUntil } from 'rxjs/operators';
 import { Course } from 'src/app/interfaces/course';
+import { Student } from 'src/app/interfaces/student';
+import { AuthService } from 'src/app/services/auth.service';
 import { CourseService } from 'src/app/services/course.service';
+import { EnrollmentService } from 'src/app/services/enrollment.service';
 
 @Component({
   selector: 'app-coursedetails',
   templateUrl: './coursedetails.component.html',
   styleUrls: ['./coursedetails.component.css']
 })
-export class CoursedetailsComponent implements OnInit{
+export class CoursedetailsComponent implements OnInit, OnDestroy {
 
-  courseId : number;
-  course: Course;
+  course: Course | null = null;
+  enrolledStudents: Student[] = [];
+  isEnrolled = false;
+  enrollActionState: 'idle' | 'loading' | 'success' | 'error' = 'idle';
 
   tabs = [
-    { id: 'basicData', title: 'Basic data', content: 'Content for Basic data tab.' },
-    { id: 'students', title: 'Students', content: 'Content for Students tab.' },
-    { id: 'lecturers', title: 'Lecturers', content: 'Content for Lecturers tab.' },
-    { id: 'textbooks', title: 'Textbooks', content: 'Content for Textbooks tab.' },
-    { id: 'classSchedule', title: 'Class schedule', content: 'Content for Class Schedule tab.' },
-    { id: 'attendanceStatistics', title: 'Attendance statistics', content: 'Content for Attendance Statistics tab.' },
-    { id: 'tasks', title: 'Tasks', content: 'Content for Tasks tab.' },
-    { id: 'eMaterials', title: 'E-materials', content: 'Content for E-materials tab.' },
-    { id: 'rankedRegistration', title: 'Ranked registration', content: 'Content for Ranked Registration tab.' }
+    { id: 'basicData',            title: 'Basic data' },
+    { id: 'students',             title: 'Students' },
+    { id: 'lecturers',            title: 'Lecturers' },
+    { id: 'textbooks',            title: 'Textbooks' },
+    { id: 'classSchedule',        title: 'Class schedule' },
+    { id: 'attendanceStatistics', title: 'Attendance statistics' },
+    { id: 'tasks',                title: 'Tasks' },
+    { id: 'eMaterials',           title: 'E-materials' },
+    { id: 'rankedRegistration',   title: 'Ranked registration' }
   ];
 
   selectedTabId = this.tabs[0].id;
 
+  private courseId = 0;
+  private destroy$ = new Subject<void>();
 
-
-  constructor(private route : ActivatedRoute,
-              private courseService : CourseService
-  ){}
-
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private courseService: CourseService,
+    private enrollmentService: EnrollmentService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
-    
-    this.route.paramMap.subscribe(params => {
-      const paramId = params.get('courseId');
-      if (paramId !== null) {
-        this.courseId = Number(paramId);
-        this.getCourseByCourseId(this.courseId);
-      } else {
-        this.courseId = 0; 
-        console.error('No course ID provided');
-      }
-    });
+    this.route.paramMap.pipe(
+      takeUntil(this.destroy$),
+      switchMap(params => {
+        this.courseId = Number(params.get('courseId') ?? 0);
+        this.loadEnrolledStudents();
+        this.loadEnrollmentStatus();
+        return this.courseService.getCourseByCourseId(this.courseId);
+      })
+    ).subscribe({ next: course => this.course = course });
   }
-  
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
-  selectTab(tabId: string) {
+  private loadEnrolledStudents(): void {
+    this.courseService.getEnrolledStudents(this.courseId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({ next: data => this.enrolledStudents = data });
+  }
+
+  private loadEnrollmentStatus(): void {
+    this.enrollmentService.isEnrolled(this.courseId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({ next: enrolled => this.isEnrolled = enrolled });
+  }
+
+  register(): void {
+    const neptunCode = this.authService.getLoggedUserSync();
+    if (!neptunCode || this.enrollActionState === 'loading') return;
+
+    this.enrollActionState = 'loading';
+    this.enrollmentService.registerCourse(this.courseId, neptunCode)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.isEnrolled = true;
+          this.enrollActionState = 'idle';
+          this.loadEnrolledStudents();
+        },
+        error: () => this.enrollActionState = 'error'
+      });
+  }
+
+  unregister(): void {
+    if (this.enrollActionState === 'loading') return;
+
+    this.enrollActionState = 'loading';
+    this.enrollmentService.unregisterCourse(this.courseId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.isEnrolled = false;
+          this.enrollActionState = 'idle';
+          this.loadEnrolledStudents();
+        },
+        error: () => this.enrollActionState = 'error'
+      });
+  }
+
+  goBack(): void {
+    this.router.navigate(['/enrollment']);
+  }
+
+  selectTab(tabId: string): void {
     this.selectedTabId = tabId;
   }
 
-  get selectedTab() {
-    return this.tabs.find(tab => tab.id === this.selectedTabId);
+  trackByTabId(_index: number, tab: { id: string }): string {
+    return tab.id;
   }
 
-  getCourseByCourseId(courseId : number){
-    return this.courseService.getCourseByCourseId(courseId).pipe(
-      tap(courseFromDB => {
-         this.course = courseFromDB;
-      })
-    ).subscribe();
-
+  trackByNeptunCode(_index: number, student: Student): string {
+    return student.neptunCode;
   }
-
 }

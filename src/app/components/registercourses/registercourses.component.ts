@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Subscription, catchError, of, tap } from 'rxjs';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { AuthService } from 'src/app/services/auth.service';
 import { EnrollmentService } from 'src/app/services/enrollment.service';
 
@@ -9,52 +11,51 @@ import { EnrollmentService } from 'src/app/services/enrollment.service';
   templateUrl: './registercourses.component.html',
   styleUrls: ['./registercourses.component.css']
 })
-export class RegistercoursesComponent implements OnInit{
+export class RegistercoursesComponent implements OnInit, OnDestroy {
 
-  
-  courseId : number;
-  //studentId: number;
-  neptunCode: string;
-  private subscription: Subscription;
+  courseId = 0;
+  errorStatus: number | null = null;
+  isLoading = false;
 
-  constructor(private route : ActivatedRoute,
-              private enrollmentService: EnrollmentService,
-              private authService : AuthService
-  ){}
-  
+  private destroy$ = new Subject<void>();
+
+  constructor(
+    private route: ActivatedRoute,
+    private enrollmentService: EnrollmentService,
+    private authService: AuthService,
+    private router: Router
+  ) {}
+
   ngOnInit(): void {
-    this.route.paramMap.subscribe(params => {
-      const paramMap = params.get('courseId'); 
-      if (paramMap !== null) {
-        this.courseId = Number(paramMap);
-      }
-      else {
-        this.courseId = 0;
-        console.error('No course ID provided');
-      }
-    });
+    this.route.paramMap
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(params => {
+        this.courseId = Number(params.get('courseId') ?? 0);
+      });
   }
 
-  registerCourse() {
-    this.getUser();
-    console.log("ENROLLMENTDTO", this.courseId, this.neptunCode);
-    return this.enrollmentService.registerCourse(this.courseId, this.neptunCode).subscribe();
-    }
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
-    getUser() {
-      this.subscription = this.authService.geLoggedUser()
-        .pipe(
-          tap((neptunCode) => {
-            this.neptunCode = neptunCode;
-          }),
-          catchError(error => {
-            console.error('Error fetching logged in user:', error);
-            // Handle the error accordingly
-            return of(null); // Return a default fallback value or handle the error appropriately
-          })
-        )
-        .subscribe();
-    }
-  
+  registerCourse(): void {
+    // I10: getLoggedUserSync() — no Observable wrapper needed for a synchronous decode
+    const neptunCode = this.authService.getLoggedUserSync();
+    if (!neptunCode || this.isLoading) return;
 
+    this.isLoading = true;
+    this.enrollmentService.registerCourse(this.courseId, neptunCode)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response: HttpResponse<any>) => {
+          this.isLoading = false;
+          this.router.navigate(['/enrollment'], { queryParams: { status: response.status } });
+        },
+        error: (e: HttpErrorResponse) => {
+          this.isLoading = false;
+          this.errorStatus = e.status;
+        }
+      });
+  }
 }

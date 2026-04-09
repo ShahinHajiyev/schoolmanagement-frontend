@@ -1,45 +1,64 @@
 <div class="login-page">
   <div class="login-form">
     <br><br>
-    <form (ngSubmit)="login()" *ngIf="showLogin" [formGroup]="loginForm">
+
+    <!-- Login form -->
+    <form (ngSubmit)="login()" *ngIf="activeView === 'login'" [formGroup]="loginForm">
       <h2>Login</h2>
       <br>
       <div class="inputbox">
-        <input type="text" id="neptunCode" formControlName="neptunCode" placeholder="neptun code">
+        <input type="text" formControlName="neptunCode" placeholder="neptun code">
       </div>
       <br>
       <div class="inputbox">
-        <input type="password" id="password" formControlName="password" placeholder="password">
+        <input type="password" formControlName="password" placeholder="password">
       </div>
       <br>
-      <button class="inputbox" type="submit" [disabled]="!loginForm.valid">Login</button>
+      <div *ngIf="errorStatus" class="error-message">
+        <span *ngIf="errorStatus === 401">Invalid credentials.</span>
+        <span *ngIf="errorStatus !== 401">An error occurred ({{ errorStatus }}).</span>
+      </div>
+      <button class="inputbox" type="submit" [disabled]="loginForm.invalid || isLoading">
+        {{ isLoading ? 'Logging in…' : 'Login' }}
+      </button>
     </form>
 
-    <form (ngSubmit)="register()" *ngIf="showRegister" [formGroup]="registrationForm">
+    <!-- Register form -->
+    <form (ngSubmit)="register()" *ngIf="activeView === 'register'" [formGroup]="registrationForm">
       <h2>Register</h2>
       <br>
       <div class="inputbox">
-        <input type="text" id="neptunCode" formControlName="neptunCode" placeholder="neptun code">
+        <input type="text" formControlName="neptunCode" placeholder="neptun code">
       </div>
       <br>
       <div class="inputbox">
-        <input type="text" id="email" formControlName="email" placeholder="email">
+        <input type="text" formControlName="email" placeholder="email">
       </div>
       <br>
       <div class="inputbox">
-        <input type="password" id="password" formControlName="password" placeholder="password">
+        <input type="password" formControlName="password" placeholder="password">
       </div>
       <br>
       <div class="inputbox">
-        <input type="password" id="confirmPassword" formControlName="confirmPassword" placeholder="confirm password">
+        <input type="password" formControlName="confirmPassword" placeholder="confirm password">
+      </div>
+      <div *ngIf="registrationForm.errors?.['passwordMismatch']" class="error-message">
+        Passwords do not match.
       </div>
       <br>
-      <button class="inputbox" type="submit" [disabled]="!registrationForm.valid">Register</button>
+      <div *ngIf="errorStatus" class="error-message">
+        Registration failed ({{ errorStatus }}).
+      </div>
+      <button class="inputbox" type="submit" [disabled]="registrationForm.invalid || isLoading">
+        {{ isLoading ? 'Registering…' : 'Register' }}
+      </button>
     </form>
+
+    <!-- View toggle -->
     <div class="buttons">
-      <a href="#" *ngIf="showLogin" [hidden]>Forgot password</a>
-      <button (click)="showLoginForm()" *ngIf="showRegister" [hidden] id="showlogin">Login</button>
-      <button (click)="showRegisterForm()" *ngIf="showLogin" [hidden]>Register</button>
+      <button (click)="showLoginForm()"    *ngIf="activeView === 'register'">Back to Login</button>
+      <button (click)="showRegisterForm()" *ngIf="activeView === 'login'">Register</button>
     </div>
+
   </div>
 </div>

@@ -1,49 +1,88 @@
 <div class="enrollment-container">
 
-    <div class="course-table">
-
-
-        <h2>Available courses</h2>
-        <br>
-        <div class="courses">
-            <table>
-                <thead class="table-head">
-                    <tr>
-                        <th>Courses</th>
-                        <th>Semester</th>
-                        <th>Credit</th>
-                        <th>Courses</th>
-                        <th>Registration</th>
-                    </tr>
-                </thead>
-
-                <tbody *ngFor="let courses of availableCourses; let i = index">
-                    <tr>
-                        <td class="course-names" [routerLink]="[dropdowns[1].route, courses.courseId]">{{courses.courseName}}</td>
-                        <td>{{courses.semester.id}}</td>
-                        <td>{{courses.credit}}</td>
-                        <td>{{courses.semester.id}}</td>
-                        <td class="register-dropdown">
-                            <button type="button" id="dropDownButton" class="dropdown-button"
-                                (click)="toggleDropdown(i)">+</button>
-                            <div class="dropdown-content" *ngIf="dropdownStates[i]">
-                                <a *ngFor="let dropdown of dropdowns" [routerLink]="[dropdown.route, courses.courseId]">
-                               {{dropdown.value}}
-                                </a>
-
-                            </div>
-
-                        </td>
-
-                    </tr>
-
-
-                </tbody>
-
-            </table>
-
- 
-        </div>
+  <!-- My Enrollments -->
+  <section class="section">
+    <h2 class="section-title">My Enrollments</h2>
+    <div class="table-wrapper">
+      <table *ngIf="myEnrollments.length > 0; else noEnrollments">
+        <thead>
+          <tr>
+            <th>Course</th>
+            <th>Teacher</th>
+            <th>Semester</th>
+            <th>Credits</th>
+            <th>Grade</th>
+            <th>Enrolled On</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let e of myEnrollments; trackBy: trackByEnrollmentId">
+            <td class="course-name" [routerLink]="['/courseDetails', e.course.courseId]">
+              {{ e.course.courseName ?? '—' }}
+            </td>
+            <td>{{ e.course.teacher?.firstName ?? '—' }} {{ e.course.teacher?.lastName ?? '' }}</td>
+            <td>{{ e.course.semester?.name ?? '—' }}</td>
+            <td>{{ e.course.credit ?? '—' }}</td>
+            <td>
+              <span class="grade-badge" [class.grade-badge--empty]="!e.grade">
+                {{ e.grade ?? '—' }}
+              </span>
+            </td>
+            <td>{{ e.dateOfRegister | date:'MMM d, y' }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <ng-template #noEnrollments>
+        <p class="empty-state">You are not enrolled in any courses yet.</p>
+      </ng-template>
     </div>
+  </section>
+
+  <!-- Available Courses -->
+  <section class="section">
+    <h2 class="section-title">Available Courses</h2>
+    <div class="table-wrapper">
+      <table *ngIf="availableCourses.length > 0; else noCourses">
+        <thead>
+          <tr>
+            <th>Course</th>
+            <th>Teacher</th>
+            <th>Semester</th>
+            <th>Credits</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let course of availableCourses; trackBy: trackByCourseId">
+            <td class="course-name" [routerLink]="['/courseDetails', course.courseId]">
+              {{ course.courseName ?? '—' }}
+            </td>
+            <td>{{ course.teacher?.firstName ?? '—' }} {{ course.teacher?.lastName ?? '' }}</td>
+            <td>{{ course.semester?.name ?? '—' }}</td>
+            <td>{{ course.credit ?? '—' }}</td>
+            <td class="actions-cell">
+              <button class="btn btn--outline" [routerLink]="['/courseDetails', course.courseId]">
+                Details
+              </button>
+              <button
+                class="btn btn--primary"
+                [class.btn--success]="registerState[course.courseId] === 'success'"
+                [class.btn--error]="registerState[course.courseId] === 'error'"
+                [disabled]="registerState[course.courseId] === 'loading' || registerState[course.courseId] === 'success'"
+                (click)="register(course.courseId)">
+                <span *ngIf="registerState[course.courseId] === 'loading'">...</span>
+                <span *ngIf="registerState[course.courseId] === 'success'">Registered</span>
+                <span *ngIf="registerState[course.courseId] === 'error'">Retry</span>
+                <span *ngIf="registerState[course.courseId] === 'idle' || !registerState[course.courseId]">Register</span>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <ng-template #noCourses>
+        <p class="empty-state">No available courses at this time.</p>
+      </ng-template>
+    </div>
+  </section>
 
 </div>

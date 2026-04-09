@@ -1,0 +1,177 @@
+/* ── Container ───────────────────────────────────────────────── */
+.grades-container {
+  padding: 24px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* ── Page header ─────────────────────────────────────────────── */
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #222;
+  margin: 0;
+}
+
+/* ── Course selector ─────────────────────────────────────────── */
+.course-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.selector-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.form-input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  outline: none;
+  min-width: 280px;
+  background: #fff;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus { border-color: #3498db; }
+
+/* ── Table wrapper ───────────────────────────────────────────── */
+.table-wrapper {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+thead { background: #f7f8fa; }
+
+th {
+  text-align: left;
+  padding: 10px 16px;
+  border-bottom: 2px solid #eee;
+  color: #888;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #444;
+  vertical-align: middle;
+}
+
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: #fafafa; }
+
+.course-name  { font-weight: 600; color: #222; }
+.neptun-code  { font-weight: 600; color: #222; }
+
+/* ── Grade value ─────────────────────────────────────────────── */
+.grade-cell { min-width: 80px; }
+
+.grade-value {
+  display: inline-block;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #222;
+}
+
+.grade-value--empty {
+  color: #ccc;
+  font-weight: 400;
+  font-size: 0.9rem;
+}
+
+/* ── Grade input ─────────────────────────────────────────────── */
+.grade-input {
+  width: 60px;
+  padding: 4px 8px;
+  border: 1px solid #3498db;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  text-align: center;
+  outline: none;
+}
+
+/* ── Status badge ────────────────────────────────────────────── */
+.status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-badge--pass    { background: #2ecc7122; color: #27ae60; }
+.status-badge--fail    { background: #e74c3c22; color: #c0392b; }
+.status-badge--pending { background: #e0e0e0;   color: #999;    }
+
+/* ── Action buttons ──────────────────────────────────────────── */
+.actions-cell {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.btn {
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn--sm { padding: 4px 10px; font-size: 0.78rem; }
+
+.btn--primary { background: #3498db; color: #fff; }
+.btn--primary:hover { background: #2980b9; }
+
+.btn--outline {
+  background: transparent;
+  color: #3498db;
+  border: 1px solid #3498db;
+}
+.btn--outline:hover { background: #3498db; color: #fff; }
+
+.btn--ghost {
+  background: transparent;
+  color: #888;
+  border: 1px solid #ddd;
+}
+.btn--ghost:hover { background: #f5f5f5; }
+
+/* ── Feedback ────────────────────────────────────────────────── */
+.saving-msg { font-size: 0.78rem; color: #888;    }
+.error-msg  { font-size: 0.78rem; color: #e74c3c; }
+
+/* ── Empty state ─────────────────────────────────────────────── */
+.empty-state { color: #aaa; font-size: 0.875rem; padding: 20px 16px; margin: 0; }
+.empty-state--padded { padding: 24px; }

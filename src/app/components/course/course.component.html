@@ -1,19 +1,48 @@
 <div class="course-container">
-  <div class="courses">
 
-
-    <div class="items" *ngFor="let course of courses">
-      <!-- Display object properties -->
-      <div>ID: {{ course.courseId }}</div>
-      <div>Name: {{ course.courseName }}</div>
-      <div>Description: {{ course.credit }}</div>
-      <div>Semester: {{course.semester.id}}</div>
-      <!-- Add more properties as needed -->
+  <div class="page-header">
+    <h2 class="page-title">Courses</h2>
+    <div class="header-actions">
+      <input
+        class="search-input"
+        type="text"
+        placeholder="Search by course name..."
+        [(ngModel)]="searchTerm" />
+      <button *ngIf="isAdmin" class="btn btn--primary">+ Add Course</button>
     </div>
-  
-  
-    <button (click)="logout()">LOGOUT</button>
   </div>
+
+  <div class="courses" *ngIf="filteredCourses.length > 0; else noCourses">
+    <div
+      class="course-card"
+      *ngFor="let course of filteredCourses; trackBy: trackByCourseId">
+      <div class="course-card__body">
+        <h3 class="course-card__name">{{ course.courseName }}</h3>
+        <div class="course-card__meta">
+          <span class="meta-item">
+            <span class="meta-label">Teacher</span>
+            {{ course.teacher.firstName }} {{ course.teacher.lastName }}
+          </span>
+          <span class="meta-item">
+            <span class="meta-label">Semester</span>
+            {{ course.semester.name }}
+          </span>
+          <span class="meta-item">
+            <span class="meta-label">Credits</span>
+            {{ course.credit }}
+          </span>
+        </div>
+      </div>
+      <div class="course-card__footer">
+        <button class="btn btn--outline" [routerLink]="['/courseDetails', course.courseId]">
+          View Details
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #noCourses>
+    <p class="empty-state">No courses found.</p>
+  </ng-template>
+
 </div>
-
-

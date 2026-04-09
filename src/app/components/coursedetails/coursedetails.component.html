@@ -1,78 +1,119 @@
+<div class="coursedetails-container" *ngIf="course; else loading">
 
-<div class="container">
-    <h1>Course details</h1>
-    <div class="tabs">
-        <button *ngFor="let tab of tabs" (click)="selectTab(tab.id)">
-            {{ tab.title }}
-        </button>
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <button class="btn btn--ghost" (click)="goBack()">&#8592; Back</button>
+      <h2 class="page-title">{{ course.courseName }}</h2>
     </div>
-    <div class="tab-content" [ngSwitch]="selectedTabId">
-
-        <div *ngSwitchCase="'basicData'">  
-            
-            <h2>Basic data (INBGA9989E)</h2>
-            <p><strong>Code:</strong> INBGA9989E</p>
-            <p><strong>Subject name:</strong>{{course.courseName}} </p>
-            <p><strong>Exam type:</strong> Online written exam and oral exam; Online written exam; Online oral exam</p>
-            <p><strong>Minimum headcount:</strong> 0</p>
-            <p><strong>Maximum headcount:</strong> 999</p>
-            <p><strong>Max. number of waiting-list:</strong> 0</p>
-            <p><strong>Language:</strong> English</p>
-            <p><strong>Term:</strong> 2020/21/2</p>
-            <p><strong>Course type:</strong> Theoretical</p>
-            <p><strong>Course price:</strong></p>
-            <p><strong>Class schedule information:</strong> W:08:00-10:00(IK-TEOKJ fszt. 108. (IV.ea.) )</p>
-            <p><strong>Lecturer:</strong> {{course.teacher.firstName}} {{course.teacher.lastName}}</p>
-            <p><strong>Internet address:</strong> KepzesLetezik("IKBN_PTI_angol") VAGY KepzesLetezik("IKBN_MI_angol") VAGY KepzesLetezik("IKBN_GI_angol")</p>
-            <p><strong>Preliminary requirement:</strong> KepzesLetezik("IKBN_PTI_angol") VAGY KepzesLetezik("IKBN_MI_angol") VAGY KepzesLetezik("IKBN_GI_angol")</p>
-            <p><strong>Course type identifier:</strong> Normal</p>
-            <p><strong>Classes per week:</strong> 2</p>
-            <p><strong>Classes per term:</strong> 0</p>
-            <button>More class schedule information</button>
-            <h3>Subjects belonging to the course</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Subject code</th>
-                        <th>Subject name</th>
-                        <th>Type of subject requirement</th>
-                        <th>Organizational unit</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>INBGA9989-17</td>
-                        <td>Business Etiquette</td>
-                        <td>Exam</td>
-                        <td>IKTO - Education Office</td>
-                    </tr>
-                    <tr>
-                        <td>INBGA9989-17</td>
-                        <td>Business Etiquette</td>
-                        <td>Exam</td>
-                        <td>IKTO - Education Office</td>
-                    </tr>
-                    <tr>
-                        <td>INBMA9989-17</td>
-                        <td>Business Etiquette</td>
-                        <td>Exam</td>
-                        <td>IKTO - Education Office</td>
-                    </tr>
-                    <tr>
-                        <td>INFJVA1-K3</td>
-                        <td>Business Etiquette</td>
-                        <td>Exam</td>
-                        <td>IKTO - Education Office</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div *ngSwitchCase="'students'">
-            <h2>asdasd1weeasdcax</h2>
-        </div>
-
-
+    <div class="header-right">
+      <span *ngIf="enrollActionState === 'error'" class="error-msg">Action failed. Try again.</span>
+      <button
+        *ngIf="!isEnrolled"
+        class="btn btn--primary"
+        [disabled]="enrollActionState === 'loading'"
+        (click)="register()">
+        {{ enrollActionState === 'loading' ? '...' : 'Register' }}
+      </button>
+      <button
+        *ngIf="isEnrolled"
+        class="btn btn--danger"
+        [disabled]="enrollActionState === 'loading'"
+        (click)="unregister()">
+        {{ enrollActionState === 'loading' ? '...' : 'Unregister' }}
+      </button>
     </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button
+      *ngFor="let tab of tabs; trackBy: trackByTabId"
+      class="tab-btn"
+      [class.tab-btn--active]="tab.id === selectedTabId"
+      (click)="selectTab(tab.id)">
+      {{ tab.title }}
+    </button>
+  </div>
+
+  <!-- Tab content -->
+  <div class="tab-content" [ngSwitch]="selectedTabId">
+
+    <!-- Basic Data -->
+    <div *ngSwitchCase="'basicData'" class="tab-pane">
+      <div class="info-grid">
+        <div class="info-row">
+          <span class="info-label">Course ID</span>
+          <span class="info-value">{{ course.courseId }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Course Name</span>
+          <span class="info-value">{{ course.courseName }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Credits</span>
+          <span class="info-value">{{ course.credit }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Semester</span>
+          <span class="info-value">{{ course.semester?.name ?? '—' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Lecturer</span>
+          <span class="info-value">{{ course.teacher?.firstName ?? '—' }} {{ course.teacher?.lastName ?? '' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Students -->
+    <div *ngSwitchCase="'students'" class="tab-pane">
+      <table *ngIf="enrolledStudents.length > 0; else noStudents">
+        <thead>
+          <tr>
+            <th>Neptun Code</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of enrolledStudents; trackBy: trackByNeptunCode">
+            <td>{{ s.neptunCode }}</td>
+            <td>{{ s.email }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <ng-template #noStudents>
+        <p class="empty-state">No students enrolled yet.</p>
+      </ng-template>
+    </div>
+
+    <!-- Lecturers -->
+    <div *ngSwitchCase="'lecturers'" class="tab-pane">
+      <div class="info-grid" *ngIf="course.teacher; else noTeacher">
+        <div class="info-row">
+          <span class="info-label">First Name</span>
+          <span class="info-value">{{ course.teacher.firstName }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Last Name</span>
+          <span class="info-value">{{ course.teacher.lastName }}</span>
+        </div>
+      </div>
+      <ng-template #noTeacher>
+        <p class="empty-state">No lecturer assigned.</p>
+      </ng-template>
+    </div>
+
+    <!-- Placeholder tabs -->
+    <div *ngSwitchCase="'textbooks'" class="tab-pane coming-soon">Coming soon</div>
+    <div *ngSwitchCase="'classSchedule'" class="tab-pane coming-soon">Coming soon</div>
+    <div *ngSwitchCase="'attendanceStatistics'" class="tab-pane coming-soon">Coming soon</div>
+    <div *ngSwitchCase="'tasks'" class="tab-pane coming-soon">Coming soon</div>
+    <div *ngSwitchCase="'eMaterials'" class="tab-pane coming-soon">Coming soon</div>
+    <div *ngSwitchCase="'rankedRegistration'" class="tab-pane coming-soon">Coming soon</div>
+
+  </div>
 </div>
 
+<ng-template #loading>
+  <p class="loading-msg">Loading course details...</p>
+</ng-template>

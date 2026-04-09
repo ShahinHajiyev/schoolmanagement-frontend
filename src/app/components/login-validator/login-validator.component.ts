@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Router, RouterStateSnapshot } from '@angular/router';
-import { AuthService, CanComponentDeactivate, CanDeactivateType } from 'src/app/services/auth.service';
+import { ActivatedRoute, Router, RouterStateSnapshot } from '@angular/router';
+import { take } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { AuthService, CanComponentDeactivate, CanDeactivateType, sharedCanDeactivate } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-login-validator',
@@ -10,63 +12,46 @@ import { AuthService, CanComponentDeactivate, CanDeactivateType } from 'src/app/
 })
 export class LoginValidatorComponent implements OnInit, CanComponentDeactivate {
 
+  activationForm!: FormGroup;
+  errorStatus: number | null = null;
+  isLoading = false;
 
-  constructor(private authService: AuthService,
-    private router: Router) {
+  // I8: neptunCode read from query param — not from a mutable service field
+  readonly neptunCode: string;
 
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    route: ActivatedRoute
+  ) {
+    this.neptunCode = (route.snapshot.queryParamMap.get('neptunCode') ?? '').toUpperCase();
   }
 
-  activationForm!: FormGroup;
-
-
-  ngOnInit() {
-    this.authService.hideSideBar();
-    this.getNeptunCode;
-    console.log(this.getNeptunCode, "ONONOTTTTTTTTTTT")
-
+  ngOnInit(): void {
     this.activationForm = new FormGroup({
       activationCode: new FormControl('', [Validators.required])
-    })
-
+    });
   }
 
-  canDeactivate(currentState: RouterStateSnapshot,
-    nextState: RouterStateSnapshot): CanDeactivateType {
-    console.log("HERE")
-
-    const isLoginRoute = window.location.pathname.includes('/login');
-
-    const currentPath = currentState.url;
-    console.log('CurrentState', currentPath)
-    const nextRoute = nextState && nextState.url.includes('/login');
-    console.log("Next url", nextState.url)
-    console.log("PATHNAME", window.location.pathname)
-
-    console.log(isLoginRoute)
-    console.log(this.router.url)
-
-    console.log("The next route", nextRoute)
-
-    if (this.authService.isLogoutInProcess) {               //to do
-      this.authService.completeLogout();
-      return true;
-    }
-
-     if (nextRoute) {
-     //If the user is logged in, prevent navigation by returning false
-     return false;
-     }
-
-    // Allow navigation if the user is not logged in
-    return true;
+  canDeactivate(_currentState: RouterStateSnapshot, nextState: RouterStateSnapshot): CanDeactivateType {
+    return sharedCanDeactivate(this.authService, nextState);
   }
 
-  get getNeptunCode() : string {
-    return this.authService.neptunCode.toUpperCase();
+  activateAccount(): void {
+    if (this.activationForm.invalid || this.isLoading) return;
+    this.isLoading = true;
+    this.authService.activateAccount(
+      this.activationForm.value.activationCode,
+      this.neptunCode
+    ).pipe(take(1)).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.router.navigate(['/login']);
+      },
+      error: (e: HttpErrorResponse) => {
+        this.isLoading = false;
+        this.errorStatus = e.status;
+      }
+    });
   }
-
-  activateAccount() : void {
-    this.authService.activateAccount(this.activationForm.value.activationCode, this.getNeptunCode).subscribe()
-  }
-
 }

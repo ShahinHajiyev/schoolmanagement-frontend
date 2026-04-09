@@ -1,326 +1,265 @@
 import { HttpClient, HttpErrorResponse, HttpResponse } from '@angular/common/http';
-import { Injectable, NgModule, inject } from '@angular/core';
-import { CanActivateFn, ActivatedRouteSnapshot, Router, CanActivateChildFn, ActivatedRoute, CanDeactivateFn, UrlTree, NavigationEnd, NavigationStart, RouterStateSnapshot } from '@angular/router';
+import { Injectable, inject } from '@angular/core';
+import {
+  CanActivateFn, ActivatedRouteSnapshot, Router, CanActivateChildFn,
+  CanDeactivateFn, UrlTree, RouterStateSnapshot
+} from '@angular/router';
 import { JwtHelperService } from '@auth0/angular-jwt';
-import { BehaviorSubject, EMPTY, Observable, Subject, catchError, map, of, tap, throwError } from 'rxjs';
-
-
-
-
+import { BehaviorSubject, Observable, catchError, map, tap, throwError } from 'rxjs';
 import * as jwt_decode from 'jwt-decode';
-import { LoginComponent } from '../components/login/login.component';
-import { Menu } from '../interfaces/menu';
+
 import { LocalStorageService } from './local-storage.service';
+import { JwtPayload } from '../interfaces/jwt-payload';
+import { environment } from 'src/environments/environment';
 
-
-
+const AUTH_TOKEN_KEY = 'auth-token';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  public apiURL = 'http://localhost:8090/api'
-  static isAuthenticated: any;
-  private isLoggedIn: boolean = false;
-  public isLogoutInProcess: boolean = false;
-  adminRole: string = "ROLE_ADMIN";
-  errorStatusCode: any; // Initialize the error status code property
+  readonly apiUrl = environment.apiUrl;
+  readonly adminRole = 'ROLE_ADMIN';
 
-  currentPath: string | undefined;
-  currentRoute: string = '';
-  neptunCode!: string;
+  // I6: private backing field — read-only to outside via getter
+  private logoutInProcess = false;
 
- 
-  private loaderSubject = new BehaviorSubject<boolean>(false);
-  loaderState = this.loaderSubject.asObservable();
+  // I4: initialized with the real value so BehaviorSubject never emits a wrong initial state
+  private isTokenExpiredSubject = new BehaviorSubject<boolean>(this.isTokenExpiredSync());
 
-  constructor(private http: HttpClient,
-    private jwtHelper: JwtHelperService,
-    private activatedRoute: ActivatedRoute,
+  /** Emits true when a valid, non-expired token exists. Safe to use with async pipe. */
+  readonly isLoggedIn$ = this.isTokenExpiredSubject.pipe(map(expired => !expired));
+
+  private expiryTimer: ReturnType<typeof setTimeout> | null = null;
+  private inactivityDuration = 0;
+  private lastStorageUpdate = 0;
+  private listenersActive = false;
+  private readonly activityEvents = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
+  private readonly boundActivityHandler = () => this.onUserActivity();
+
+  constructor(
+    private http: HttpClient,
     private router: Router,
-    private locaStorageService: LocalStorageService) {
+    private jwtHelper: JwtHelperService,
+    private localStorageService: LocalStorageService
+  ) {}
 
+  // ─── Error handling ──────────────────────────────────────────────────────────
 
-    this.router.events.subscribe((event) => {
-      if (event instanceof NavigationStart) {
-        this.currentRoute = event.url;
-      }
-    });
-
-    this.activatedRoute.url.subscribe((segments) => {
-
-      this.currentPath = segments[0] ? segments[0].path : '';  //this one does not work
-      console.log("WHAT IS THE CURRENT PATH: ", this.currentPath);
-    })
-
-  }
-
-
-
-
-  public handleError(error?: HttpErrorResponse) : Observable<any> {
-    let eMessage = "";
+  // I6: private — only used inside this service
+  private handleError(error?: HttpErrorResponse): Observable<never> {
     if (error) {
-
-    //this.errorStatusCode = error;
-    //console.log("ErrorStatusCode" ,this.errorStatusCode.status);
-    
-    if (error.status === 0) {
-      // A client-side or network error occurred. Handle it accordingly.
-      console.error('An error occurred:', error.error);
-    } else 
-      // The backend returned an unsuccessful response code.
-      // The response body may contain clues as to what went wrong.
-      console.error(
-        `Backend returned code ${error.status}, body was: `, error.error);
-        
+      if (error.status === 0) {
+        console.error('Network error:', error.message);
+      } else {
+        console.error(`HTTP ${error.status}:`, error.message);
       }
-        
-        // Return an observable with a user-facing error message.
-    //return throwError(() => new Error(error.error));
-    return throwError(() => error);
-  }  
-
-  
-
-  
-    
-  login(neptunCode: string, password: string): Observable<HttpResponse<any>> {
-    if (this.getAuthToken != null) {
-      localStorage.removeItem('auth-token');
     }
-    return this.http.post<any>(`${this.apiURL}/login`, { neptunCode, password }, { observe: 'response' })
-      .pipe(
-        tap((response: HttpResponse<any>) => {
-          const token = response.headers.get('Authorization');
-          if (token) {
-            // Store the token in local storage or wherever needed
-            //localStorage.setItem('auth-token', token || 'nothing');
-            this.locaStorageService.set('auth-token', token || 'nothing', 2)
-          }
-        }),
-
-        catchError(this.handleError)
-        
-        
-        
-      );
+    return throwError(() => error);
   }
 
-  register(password: string, _confirmPassword: string, neptunCode: string, email: string): Observable<any> {
-    return this.http.post<any>(`${this.apiURL}/user/register`, { password, neptunCode, email })
+  // ─── Token management ────────────────────────────────────────────────────────
+
+  getAuthToken(): string | null {
+    return this.localStorageService.get<string>(AUTH_TOKEN_KEY);
+  }
+
+  /**
+   * Stores the JWT using the token's own exp claim as expiry — no manual override.
+   * I5: strips "Bearer " prefix if the backend includes it in the Authorization header.
+   */
+  setOrUpdateAuthToken(rawToken: string): void {
+    const token = rawToken.startsWith('Bearer ') ? rawToken.slice(7) : rawToken;
+    this.inactivityDuration = 1000 * 1000; // TEST: 10-second inactivity window
+    this.storeToken(token);
+    this.refreshExpiredState();
+    this.startActivityListeners();
+    this.scheduleAutoLogout();
+  }
+
+  private storeToken(token: string): void {
+    this.localStorageService.set<string>(AUTH_TOKEN_KEY, token, Date.now() + this.inactivityDuration);
+    this.lastStorageUpdate = Date.now();
+  }
+
+  private scheduleAutoLogout(): void {
+    if (this.expiryTimer) clearTimeout(this.expiryTimer);
+    this.expiryTimer = setTimeout(() => {
+      this.logout();
+      this.router.navigate(['/login']);
+    }, this.inactivityDuration);
+  }
+
+  private onUserActivity(): void {
+    this.scheduleAutoLogout();
+    // Throttle localStorage update to once per second to avoid thrashing
+    if (Date.now() - this.lastStorageUpdate > 1000) {
+      const token = this.getAuthToken();
+      if (token) this.storeToken(token);
+    }
+  }
+
+  private startActivityListeners(): void {
+    if (this.listenersActive) return;
+    this.activityEvents.forEach(e => document.addEventListener(e, this.boundActivityHandler));
+    this.listenersActive = true;
+  }
+
+  private stopActivityListeners(): void {
+    this.activityEvents.forEach(e => document.removeEventListener(e, this.boundActivityHandler));
+    this.listenersActive = false;
+  }
+
+  /** I4: synchronous expiry check — used to initialize the BehaviorSubject and in guards. */
+  isTokenExpiredSync(): boolean {
+    const token = this.getAuthToken();
+    if (!token) return true;
+    return this.jwtHelper.isTokenExpired(token);
+  }
+
+  private refreshExpiredState(): void {
+    this.isTokenExpiredSubject.next(this.isTokenExpiredSync());
+  }
+
+  // ─── Auth operations ─────────────────────────────────────────────────────────
+
+  login(neptunCode: string, password: string): Observable<HttpResponse<any>> {
+    this.localStorageService.remove(AUTH_TOKEN_KEY);
+    return this.http.post<any>(
+      `${this.apiUrl}/login`,
+      { neptunCode, password },
+      { observe: 'response' }
+    ).pipe(
+      tap((response: HttpResponse<any>) => {
+        const token = response.headers.get('Authorization');
+        if (token) this.setOrUpdateAuthToken(token);
+      }),
+      catchError(e => this.handleError(e))
+    );
+  }
+
+  register(password: string, neptunCode: string, email: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/user/register`, { password, neptunCode, email });
   }
 
   logout(): void {
-    this.isLogoutInProcess = true;
-    localStorage.removeItem('auth-token');
-    this.isLoggedIn = false;
-  }
-
-  completeLogout() {
-    this.isLogoutInProcess = false;
-  }
-
-  getAuthToken(): string | null {
-    //return localStorage.getItem('auth-token');
-    return this.locaStorageService.get('auth-token');
-  }
-
-
-  isTokenExpired(): Observable<boolean> {
-    let isExpired = false;
-    const token = this.getAuthToken();
-
-    if (token) {
-      const decodedToken: any = jwt_decode.jwtDecode(token)
-      const currentTime = Math.floor(Date.now() / 1000);
-
-      
-
-      if (decodedToken.exp && decodedToken.exp < currentTime) {
-        this.router.navigate(['login']);
-        isExpired =  true;
-      }
-  }
-  return of(isExpired);
-}
-
-  isLogged(): Observable<boolean> {
-    if (this.getAuthToken() != null) {
-      this.isLoggedIn = true;
+    this.logoutInProcess = true;
+    if (this.expiryTimer) {
+      clearTimeout(this.expiryTimer);
+      this.expiryTimer = null;
     }
-    return of(this.isLoggedIn);
+    this.stopActivityListeners();
+    this.localStorageService.remove(AUTH_TOKEN_KEY);
+    this.refreshExpiredState();
   }
 
-
-  isAdmin(adminRole: string): boolean {
-    console.log("Auth service isAdmin() ")
-    let isAdmin: boolean = false;
-
-    console.log("Auth-token ", this.getAuthToken())
-
-    if (this.getAuthToken() != null) {
-      console.log("Auth service IF isAdmin() ")
-      const token: any = this.getAuthToken();
-      const decodedToken: any = jwt_decode.jwtDecode(token)
-      let roleObjectFromToken = decodedToken.authorities.find((auth: { authority: string; }) => auth.authority === 'ROLE_ADMIN');
-      let roleFromToken = roleObjectFromToken ? roleObjectFromToken.authority : null;
-      const userId = decodedToken.sub;
-      console.log("The SubJECT " , userId);
-      
-   
-
-      
-
-      console.log("The role", roleFromToken)
-
-      if (roleFromToken === adminRole) {
-        console.log("role=admin")
-        return isAdmin = true;
-      }
-    }
-    console.log("reole=user")
-    return isAdmin;
+  completeLogout(): void {
+    this.logoutInProcess = false;
   }
 
-  showSideBar() {
-    this.loaderSubject.next(true);
-    localStorage.setItem('isLoggedIn', "true");
+  activateAccount(activationCode: string, neptunCode: string): Observable<any> {
+    return this.http.post<any>(
+      `${this.apiUrl}/user/activate`,
+      { activationCode, neptunCode },
+      { observe: 'response' }
+    ).pipe(catchError(e => this.handleError(e)));
   }
 
-  getSideBarToken(){
-  return localStorage.getItem("isLoggedIn");
+  // ─── Token decoding ──────────────────────────────────────────────────────────
+
+  decodeToken(): JwtPayload | null {
+    const token = this.localStorageService.get<string>(AUTH_TOKEN_KEY);
+    if (!token) return null;
+    return jwt_decode.jwtDecode<JwtPayload>(token);
   }
 
-  hideSideBar() {
-    console.log("Sidebar in authservice hided")
-    this.loaderSubject.next(false);
-    localStorage.removeItem("isLoggedIn");
+  /** I10: synchronous — no need for an Observable wrapper around a sync operation. */
+  getLoggedUserSync(): string | null {
+    return this.decodeToken()?.sub ?? null;
   }
 
-  activateAccount(activationCode : String, neptunCode : string) : Observable<any>{
-        return this.http.post<any>(`${this.apiURL}/user/activate`, {activationCode, neptunCode}, {observe: 'response'}).pipe(
-          catchError(this.handleError)
-        )
+  // I7: uses this.adminRole internally — no parameter needed
+  isAdmin(): boolean {
+    const decoded = this.decodeToken();
+    if (!decoded) return false;
+    return decoded.authorities?.some(a => a.authority === this.adminRole) ?? false;
   }
 
-  decodeToken(){
-    const token = localStorage.getItem("auth-token");
-    const decodedToken = jwt_decode.jwtDecode(token);
-    return decodedToken;
+  // ─── Read-only public state ──────────────────────────────────────────────────
+
+  // I6: getter makes isLogoutInProcess externally readable but not settable
+  get isLogoutInProcess(): boolean {
+    return this.logoutInProcess;
   }
-
-  geLoggedUser():Observable<any>{
-    const user = this.decodeToken().sub;
-    console.log("LOGGED_USER", user)
-    return of(user);
-  }
-
-  
-
-
-
 }
 
 
+// ─── Guard types ────────────────────────────────────────────────────────────
 
-
-export type CanDeactivateType = Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree;
-
+export type CanDeactivateType =
+  | Observable<boolean | UrlTree>
+  | Promise<boolean | UrlTree>
+  | boolean
+  | UrlTree;
 
 export interface CanComponentDeactivate {
-  canDeactivate: (currentState: RouterStateSnapshot, next: RouterStateSnapshot) => CanDeactivateType;
+  canDeactivate: (
+    currentState: RouterStateSnapshot,
+    nextState: RouterStateSnapshot
+  ) => CanDeactivateType;
 }
+
+// ─── Shared canDeactivate logic ──────────────────────────────────────────────
+
+export function sharedCanDeactivate(
+  authService: AuthService,
+  nextState: RouterStateSnapshot
+): CanDeactivateType {
+  if (authService.isLogoutInProcess) {
+    authService.completeLogout();
+    return true;
+  }
+  if (nextState.url.includes('/login')) {
+    return false;
+  }
+  return true;
+}
+
+// ─── Guards ──────────────────────────────────────────────────────────────────
 
 export const canDeactivateGuard: CanDeactivateFn<CanComponentDeactivate> = (
   component: CanComponentDeactivate,
   _currentRoute: ActivatedRouteSnapshot,
   currentState: RouterStateSnapshot,
-  next: RouterStateSnapshot): CanDeactivateType => {
-
+  nextState: RouterStateSnapshot
+): CanDeactivateType => {
   if (component.canDeactivate) {
-    return component.canDeactivate(currentState, next);
+    return component.canDeactivate(currentState, nextState);
   }
-
   return true;
-
-}
+};
 
 export const canActivate: CanActivateFn = (
-  route: ActivatedRouteSnapshot,
+  _route: ActivatedRouteSnapshot,
   state: RouterStateSnapshot
 ) => {
   const authService = inject(AuthService);
   const router = inject(Router);
-  const path = state.url;
 
+  if (authService.isTokenExpiredSync()) {
+    authService.logout();
+    return router.createUrlTree(['/login']);
+  }
 
+  if (state.url.includes('/admin') && !authService.isAdmin()) {
+    return router.createUrlTree(['/course']);
+  }
 
-   console.log(state, "STATE")
-  return authService.isLogged().pipe(
-    map((loggedIn) => {
-      if (loggedIn) {
-
-        console.log("TEST: state.root: ", state.root, "state.url: ", state.url, "route.parent: ", route.parent)
-
-
-        const token = localStorage.getItem('auth-token');
-        
-        let currentUrl = router.url;
-        let nextPath = authService.currentRoute;
-        console.log("Current url", currentUrl)
-        console.log("Current path", authService.currentPath)
-        console.log("MAVIGATED--------- path", nextPath)
-
-
-        if (token) {
-          const decodedToken: any = jwt_decode.jwtDecode(token)
-          const currentTime = Math.floor(Date.now() / 1000);
-
-          console.log("If token")
-
-          if (decodedToken.exp && decodedToken.exp < currentTime) {
-            router.navigate(['login']);
-            return false;
-          }
-
-          if (authService.isAdmin(authService.adminRole) != true && state.url.includes('/admin')) {
-            console.log("Can activate adminrole")
-            router.navigate(['course'])
-            return false;
-          }
-        }
-
-      
-        return true;
-      }
-
-        else if(!loggedIn && state.root.queryParamMap.get('status') === '409'){
-             
-        
-        
-             console.log("asdasdASDASDasdASDASDASDASDASD");
-           return true;
-         }
-
-      
-        router.navigate(['/login']);
-        console.log("I am coming to else in loggedin")
-        return false;
-    }
-
-    ),
-    catchError( () => {
- 
-      router.navigate(['/login']);
-      return of(false);
-    })
-  )
+  return true;
 };
 
-export const canActivateChild: CanActivateChildFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => canActivate(route, state);
-
-
-
-
+export const canActivateChild: CanActivateChildFn = (
+  route: ActivatedRouteSnapshot,
+  state: RouterStateSnapshot
+) => canActivate(route, state);

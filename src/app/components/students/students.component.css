@@ -1,0 +1,179 @@
+/* ── Container ───────────────────────────────────────────────── */
+.students-container {
+  padding: 24px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* ── Page header ─────────────────────────────────────────────── */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #222;
+  margin: 0;
+}
+
+.search-input {
+  padding: 8px 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  width: 280px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus { border-color: #3498db; }
+
+/* ── Table wrapper ───────────────────────────────────────────── */
+.table-wrapper {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+thead { background: #f7f8fa; }
+
+th {
+  text-align: left;
+  padding: 10px 16px;
+  border-bottom: 2px solid #eee;
+  color: #888;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #444;
+  vertical-align: middle;
+}
+
+/* ── Student row ─────────────────────────────────────────────── */
+.student-row {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.student-row:hover { background: #f5f9ff; }
+
+.student-row--expanded { background: #eef6ff; }
+
+.neptun-code {
+  font-weight: 600;
+  color: #222;
+}
+
+.expand-cell {
+  text-align: right;
+  width: 40px;
+}
+
+.expand-icon {
+  font-size: 0.7rem;
+  color: #aaa;
+}
+
+/* ── Count badge ─────────────────────────────────────────────── */
+.count-badge {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 12px;
+  background: #3498db22;
+  color: #3498db;
+  font-weight: 600;
+  font-size: 0.78rem;
+}
+
+/* ── Detail row ──────────────────────────────────────────────── */
+.detail-row td { padding: 0; border-bottom: 2px solid #dce9f7; }
+
+.detail-cell {
+  background: #f5f9ff;
+  padding: 16px 24px !important;
+}
+
+.detail-loading {
+  color: #aaa;
+  font-size: 0.875rem;
+  padding: 8px 0;
+}
+
+/* ── Inner (enrollment) table ────────────────────────────────── */
+.inner-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.825rem;
+  background: #fff;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+}
+
+.inner-table thead { background: #f0f4f8; }
+
+.inner-table th {
+  padding: 8px 14px;
+  font-size: 0.7rem;
+  border-bottom: 1px solid #e0e8f0;
+}
+
+.inner-table td {
+  padding: 9px 14px;
+  border-bottom: 1px solid #f0f4f8;
+  color: #555;
+}
+
+.inner-table tbody tr:last-child td { border-bottom: none; }
+
+/* ── Grade badge ─────────────────────────────────────────────── */
+.grade-badge {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 12px;
+  background: #2ecc71;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.78rem;
+}
+
+.grade-badge--empty {
+  background: #e0e0e0;
+  color: #aaa;
+}
+
+/* ── Empty states ────────────────────────────────────────────── */
+.empty-state {
+  color: #aaa;
+  font-size: 0.875rem;
+  margin: 0;
+  padding: 8px 0;
+}
+
+.empty-state--padded { padding: 20px 16px; }
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .search-input { width: 100%; }
+  .page-header { flex-direction: column; align-items: flex-start; }
+}

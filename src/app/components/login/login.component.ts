@@ -1,68 +1,41 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
-import { AuthService, CanComponentDeactivate, CanDeactivateType } from 'src/app/services/auth.service';
-import { FormGroup, Validators, FormControl } from '@angular/forms';
-import { Subscription, async, map, mapTo, take, tap, throwError } from 'rxjs';
-import { NavigationExtras, Router } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { AbstractControl, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { take } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
+import { AuthService } from 'src/app/services/auth.service';
 
-
+const passwordMatchValidator: ValidatorFn = (form: AbstractControl): ValidationErrors | null => {
+  const password = form.get('password')?.value;
+  const confirmPassword = form.get('confirmPassword')?.value;
+  if (password && confirmPassword && password !== confirmPassword) {
+    return { passwordMismatch: true };
+  }
+  return null;
+};
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent implements OnInit, OnDestroy {
+export class LoginComponent implements OnInit {
 
+  // I14: single union type instead of two mirrored booleans
+  activeView: 'login' | 'register' = 'login';
 
-  showLogin: boolean = true;
-  showRegister: boolean = false;
-  adminRole: string = "ROLE_ADMIN";
-  errorStatus : any;
+  // I12: prevents double-submission while a request is in flight
+  isLoading = false;
 
-
-
+  errorStatus: number | null = null;
 
   loginForm!: FormGroup;
   registrationForm!: FormGroup;
-  isLoggedIn: boolean = false;
-  showRegistration: boolean = false;
-  homePath: string = '';
 
+  constructor(private authService: AuthService, private router: Router) {}
 
-
-  constructor(private authService: AuthService,
-    private router: Router) { }
-
-    ngOnDestroy() {
-      console.log("This is ondestroy of login component")
-      this.authService.showSideBar();
-  }
-
-  ngOnInit() {
-    this.authService.hideSideBar();
-
-    console.log("_____________", this.homePath)
-
-
-
-
-    if (this.authService.getAuthToken() != null) {
-      console.log("LOGIN ONINIT")
-
-      this.homePath = this.authService.isAdmin(this.adminRole) ? '/admin' : '/course';
-      this.isLoggedIn = true;
-      console.log("--------------", this.homePath)
-      console.log("THIS IS THE LOGIN CHECK URL", this.router.url)
-
-
-    
-      this.router.navigate([this.homePath])
-      
-    }
-
-
-
+  ngOnInit(): void {
+    // I11: forms always initialized first — template never sees undefined loginForm
     this.loginForm = new FormGroup({
       neptunCode: new FormControl('', [Validators.required]),
       password: new FormControl('', [Validators.required]),
@@ -72,89 +45,65 @@ export class LoginComponent implements OnInit, OnDestroy {
       password: new FormControl('', [Validators.required]),
       confirmPassword: new FormControl('', [Validators.required]),
       neptunCode: new FormControl('', [Validators.required]),
-      email: new FormControl('', [Validators.required])
-    })
+      email: new FormControl('', [Validators.required, Validators.email])
+    }, { validators: passwordMatchValidator });
+
+    // Redirect after forms are ready so the template never crashes
+    if (!this.authService.isTokenExpiredSync()) {
+      this.router.navigate([this.authService.isAdmin() ? '/admin' : '/course']);
+    }
   }
-
-  
-
-
 
   login(): void {
-    this.authService.login(this.loginForm.value.neptunCode, this.loginForm.value.password)
-      .pipe(
-        take(1),
-        tap((isLoggedIn) => {
-          if (isLoggedIn) {
-            this.isLoggedIn = true;
-            this.homePath = this.authService.isAdmin(this.adminRole) ? "/admin" : "/course";
-            console.log("I AM IN LOGIN SUBSCRIBE")
-            this.router.navigate([this.homePath])
-          }
-        }),
-        
-      )
-      .subscribe({
-        
-        error: (e) =>  {
-          this.errorStatus = e.status;
-        
-       
-          console.log("LoginComponent error status", this.errorStatus)
-          if (this.errorStatus === 409) {
-          this.setNeptunCode = this.loginForm.value.neptunCode;
-          console.log(this.setNeptunCode)
-            console.log("yes here ")
-           this.router.navigate(['/login-validator'],
-            { queryParams: { status: this.errorStatus} });
+    if (this.loginForm.invalid || this.isLoading) return;
+    this.isLoading = true;
+    this.errorStatus = null;
 
-            
-          }
-          console.error('This is an error: ', e) 
-
-         
-        
+    this.authService.login(
+      this.loginForm.value.neptunCode,
+      this.loginForm.value.password
+    ).pipe(take(1)).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.router.navigate([this.authService.isAdmin() ? '/admin' : '/course']);
+      },
+      error: (e: HttpErrorResponse) => {
+        this.isLoading = false;
+        this.errorStatus = e.status;
+        if (e.status === 409) {
+          // I8: neptunCode passed as query param — not stored on the service
+          this.router.navigate(['/login-validator'], {
+            queryParams: { neptunCode: this.loginForm.value.neptunCode }
+          });
         }
       }
-      );
+    });
   }
 
-  set setNeptunCode(neptunCode : string) {
-    this.authService.neptunCode = neptunCode;
-}
+  register(): void {
+    if (this.registrationForm.invalid || this.isLoading) return;
+    this.isLoading = true;
+    this.errorStatus = null;
 
-test(){
-  const navigationExtras: NavigationExtras = {state: {example: 'This is an example'}};
-    this.router.navigate(['/login-validator'], navigationExtras);
-}
-
-
-  register() {
-    this.authService.register(this.registrationForm.value.password,
-      this.registrationForm.value.confirmPassword,
+    this.authService.register(
+      this.registrationForm.value.password,
       this.registrationForm.value.neptunCode,
-      this.registrationForm.value.email).subscribe(() => {
-        if (this.registrationForm.value.password !== this.registrationForm.value.confirmPassword) {
-          console.log('Passwords do not match');
-        } 
-        else {
-          console.log("Registration is successful");
-          this.router.navigate([''])
-        }
+      this.registrationForm.value.email
+    ).pipe(take(1)).subscribe({
+      next: () => {
+        this.isLoading = false;
+        // I13: registration triggers an activation email — go straight to the validator
+        this.router.navigate(['/login-validator'], {
+          queryParams: { neptunCode: this.registrationForm.value.neptunCode }
+        });
+      },
+      error: (e: HttpErrorResponse) => {
+        this.isLoading = false;
+        this.errorStatus = e.status;
       }
-      );
+    });
   }
 
-  showLoginForm() {
-    this.showLogin = true;
-    this.showRegister = false;
-  }
-
-  showRegisterForm() {
-    this.showLogin = false;
-    this.showRegister = true;
-  }
-
-
-
+  showLoginForm(): void  { this.activeView = 'login'; }
+  showRegisterForm(): void { this.activeView = 'register'; }
 }

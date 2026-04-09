@@ -1,10 +1,7 @@
-<div class="nav"  *ngIf="loggedIn">
-
-    <ul>
-        <li *ngFor="let menuItem of menuItems">
-            <button routerLink={{menuItem.path}}>{{menuItem.name}}</button>
-        </li>
-    </ul>    
+<div class="nav">
+  <ul>
+    <li *ngFor="let menuItem of menuItems; trackBy: trackByPath">
+      <button [routerLink]="menuItem.path">{{ menuItem.name }}</button>
+    </li>
+  </ul>
 </div>
-
-

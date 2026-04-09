@@ -2,30 +2,32 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    background-color: #f0f0f0;
-    
+    background-color: white;
   }
 
 .main-container{
     height: 100vh;
     display: flex;
     overflow-y:hidden;
-   
+    background-color: white;
 }
 
 .sidebar{
     width: 15%;
-    background-color: #f0f0f0;
+    bottom:0;
+    background-color: white;
     overflow-x:unset;
     overflow-y:visible;
 }
 
 
 .router-container{
-    flex-basis: 80%;
+    display: flex;
+    flex-basis: 100%;
     padding-left: 3%;
     background-color: #f0f0f0;
-    overflow-y: auto;
+    overflow-y: scroll;
+    scrollbar-width: none;
 }
 
 

@@ -1,8 +1,9 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { Router, RouterStateSnapshot } from '@angular/router';
-import { Observable, of } from 'rxjs';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { RouterStateSnapshot } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { Course } from 'src/app/interfaces/course';
-import { AuthService, CanComponentDeactivate, CanDeactivateType } from 'src/app/services/auth.service';
+import { AuthService, CanComponentDeactivate, CanDeactivateType, sharedCanDeactivate } from 'src/app/services/auth.service';
 import { CourseService } from 'src/app/services/course.service';
 
 @Component({
@@ -10,76 +11,42 @@ import { CourseService } from 'src/app/services/course.service';
   templateUrl: './course.component.html',
   styleUrls: ['./course.component.css']
 })
-export class CourseComponent implements OnInit, CanComponentDeactivate {
+export class CourseComponent implements OnInit, OnDestroy, CanComponentDeactivate {
 
   courses: Course[] = [];
-  isLoggedIn = false;
+  searchTerm: string = '';
+  isAdmin: boolean = false;
 
-  constructor(private courseService: CourseService,
-              private authService: AuthService,
-              private router: Router,
-              private cdr: ChangeDetectorRef){}
+  private destroy$ = new Subject<void>();
 
-  ngOnInit(): void{
+  constructor(
+    private courseService: CourseService,
+    private authService: AuthService
+  ) {}
 
-     this.isLogged();
-     this.getCourses();
-     
+  ngOnInit(): void {
+    this.isAdmin = this.authService.isAdmin();
+    this.courseService.getCourses()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({ next: data => this.courses = data });
   }
 
-   canDeactivate(currentState: RouterStateSnapshot, 
-                 nextState: RouterStateSnapshot): CanDeactivateType {
-    console.log("HERE")
-    
-    const isLoginRoute = window.location.pathname.includes('/login');
-
-    const currentPath = currentState.url;
-    console.log('CurrentState', currentPath)
-    const nextRoute = nextState && nextState.url.includes('/login');
-    console.log("Next url", nextState.url)
-    console.log("PATHNAME" , window.location.pathname)
-
-    console.log(isLoginRoute)
-    console.log(this.router.url)
-
-    console.log("The next route" , nextRoute)
-
-    if (this.authService.isLogoutInProcess) {
-      this.authService.completeLogout();
-      return true;
-    }
-
-    if (this.isLoggedIn && nextRoute) {
-      // If the user is logged in, prevent navigation by returning false
-      return false;
-    }
-
-    // Allow navigation if the user is not logged in
-    return true;
-  } 
-
-  getCourses():void{
-     this.courseService.getCourses().subscribe(data => {
-      this.courses = data;
-     });
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/login']);
-    }
+  get filteredCourses(): Course[] {
+    const term = this.searchTerm.trim().toLowerCase();
+    if (!term) return this.courses;
+    return this.courses.filter(c => c.courseName.toLowerCase().includes(term));
+  }
 
-    isLogged(){
-     return this.authService.isLogged().subscribe(
-      (loggedIn: boolean) => {
-        this.isLoggedIn = loggedIn;
-        this.cdr.detectChanges();
+  canDeactivate(_currentState: RouterStateSnapshot, nextState: RouterStateSnapshot): CanDeactivateType {
+    return sharedCanDeactivate(this.authService, nextState);
+  }
 
-        // Check the value received from the subscription
-        console.log('Is logged in:', loggedIn);
-      }
-     );
-    }
-  
-
+  trackByCourseId(_index: number, course: Course): number {
+    return course.courseId;
+  }
 }

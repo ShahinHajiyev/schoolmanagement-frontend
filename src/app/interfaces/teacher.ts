@@ -1,6 +1,5 @@
 export interface Teacher {
-
-     userId : number;
-     firstName : String;
-     lastName : String;
+  userId: number;
+  firstName: string;
+  lastName: string;
 }

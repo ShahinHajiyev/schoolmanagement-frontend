@@ -1,39 +1,177 @@
-<form (ngSubmit)="addStudent()" [formGroup]="studentForm">
-    <div class="neptunCode">
-        <label for="neptunCode">Neptun Code</label>
-        <input type="text" name="neptunCode" id="neptunCode" formControlName="neptunCode">
-    </div>
-    <div class="email">
-        <label for="email">Email</label>
-        <input type="text" name="email" id="email" formControlName="email">
-    </div>
-    <div class="dropdown">
-        <label for="selectedUser">Choose a user</label>
-<br>
-        <select name="selectedUser" formControlName="selectedUser" (change)="toggleDropdown($event)" class="">
-            <option>--Select--</option>
-            <option [value]="dropdown.value" *ngFor="let dropdown of dropdowns">{{dropdown.value}}</option>
-        </select>
-    </div>
+<div class="admin-container">
 
+  <div class="page-header">
+    <h2 class="page-title">Admin Panel</h2>
+  </div>
 
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn" [class.tab-btn--active]="activeTab === 'users'"   (click)="activeTab = 'users'">Users</button>
+    <button class="tab-btn" [class.tab-btn--active]="activeTab === 'courses'" (click)="activeTab = 'courses'">Courses</button>
+    <button class="tab-btn" [class.tab-btn--active]="activeTab === 'reports'" (click)="activeTab = 'reports'">Reports</button>
+  </div>
 
-    <br>
-    <button type="button" (click)="logout()">Logout</button>
+  <div class="tab-content" [ngSwitch]="activeTab">
 
-    <button>Add Student</button>
+    <!-- ── Users tab ──────────────────────────────────────────── -->
+    <div *ngSwitchCase="'users'" class="tab-pane">
 
+      <section class="section">
+        <h3 class="section-title">Add User</h3>
+        <form class="form" [formGroup]="userForm" (ngSubmit)="addUser()">
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-label">Neptun Code</label>
+              <input class="form-input" type="text" formControlName="neptunCode" placeholder="e.g. ABC123" />
+            </div>
+            <div class="form-field">
+              <label class="form-label">Email</label>
+              <input class="form-input" type="email" formControlName="email" placeholder="user@example.com" />
+            </div>
+            <div class="form-field">
+              <label class="form-label">Role</label>
+              <select class="form-input" formControlName="role">
+                <option value="" disabled>— Select —</option>
+                <option *ngFor="let r of roles" [value]="r.key">{{ r.label }}</option>
+              </select>
+            </div>
+            <div class="form-field form-field--action">
+              <button
+                type="submit"
+                class="btn btn--primary"
+                [disabled]="userForm.invalid || userActionState === 'loading'">
+                {{ userActionState === 'loading' ? 'Adding...' : 'Add User' }}
+              </button>
+            </div>
+          </div>
+          <p class="feedback feedback--success" *ngIf="userActionState === 'success'">User added successfully.</p>
+          <p class="feedback feedback--error"   *ngIf="userActionState === 'error'">Failed (HTTP {{ userErrorStatus }}). Check the details and retry.</p>
+        </form>
+      </section>
 
-</form>
-
-
-
-
-<!--    <div class="dropdown">
-        <button type="button" class="dropdown-button" (click)="toggleDropdown()">Select User</button>
-        <div class="dropdown-content" *ngIf="isDropdownOpen">
-            <p *ngFor="let dropdown of dropdowns">
-                {{dropdown.value}}
-            </p>
+      <section class="section">
+        <h3 class="section-title">All Users</h3>
+        <div class="table-wrapper">
+          <table *ngIf="users.length > 0; else noUsers">
+            <thead>
+              <tr>
+                <th>Neptun Code</th>
+                <th>Email</th>
+                <th>Role</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let u of users; trackBy: trackByNeptunCode">
+                <td>{{ u.neptunCode }}</td>
+                <td>{{ u.email }}</td>
+                <td><span class="role-badge" [class.role-badge--teacher]="u.role === 'Teacher'">{{ u.role }}</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <ng-template #noUsers>
+            <p class="empty-state">No users found.</p>
+          </ng-template>
         </div>
-    </div>-->
+      </section>
+
+    </div>
+
+    <!-- ── Courses tab ────────────────────────────────────────── -->
+    <div *ngSwitchCase="'courses'" class="tab-pane">
+
+      <section class="section">
+        <h3 class="section-title">Add Course</h3>
+        <form class="form" [formGroup]="courseForm" (ngSubmit)="addCourse()">
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-label">Course Name</label>
+              <input class="form-input" type="text" formControlName="courseName" placeholder="e.g. Algorithms" />
+            </div>
+            <div class="form-field">
+              <label class="form-label">Credits</label>
+              <input class="form-input" type="number" formControlName="credit" placeholder="e.g. 3" min="1" />
+            </div>
+            <div class="form-field">
+              <label class="form-label">Teacher Neptun Code</label>
+              <input class="form-input" type="text" formControlName="teacherNeptunCode" placeholder="e.g. TCH001" />
+            </div>
+            <div class="form-field">
+              <label class="form-label">Semester ID</label>
+              <input class="form-input" type="number" formControlName="semesterId" placeholder="e.g. 1" min="1" />
+            </div>
+            <div class="form-field form-field--action">
+              <button
+                type="submit"
+                class="btn btn--primary"
+                [disabled]="courseForm.invalid || courseActionState === 'loading'">
+                {{ courseActionState === 'loading' ? 'Adding...' : 'Add Course' }}
+              </button>
+            </div>
+          </div>
+          <p class="feedback feedback--success" *ngIf="courseActionState === 'success'">Course added successfully.</p>
+          <p class="feedback feedback--error"   *ngIf="courseActionState === 'error'">Failed to add course. Try again.</p>
+        </form>
+      </section>
+
+      <section class="section">
+        <h3 class="section-title">All Courses</h3>
+        <div class="table-wrapper">
+          <table *ngIf="courses.length > 0; else noCourses">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Teacher</th>
+                <th>Semester</th>
+                <th>Credits</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let c of courses; trackBy: trackByCourseId">
+                <td>{{ c.courseName }}</td>
+                <td>{{ c.teacher?.firstName ?? '—' }} {{ c.teacher?.lastName ?? '' }}</td>
+                <td>{{ c.semester?.name ?? '—' }}</td>
+                <td>{{ c.credit }}</td>
+                <td>
+                  <button
+                    class="btn btn--danger btn--sm"
+                    [disabled]="deletingCourseId === c.courseId"
+                    (click)="deleteCourse(c.courseId)">
+                    {{ deletingCourseId === c.courseId ? '...' : 'Delete' }}
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <ng-template #noCourses>
+            <p class="empty-state">No courses found.</p>
+          </ng-template>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ── Reports tab ────────────────────────────────────────── -->
+    <div *ngSwitchCase="'reports'" class="tab-pane">
+      <div class="stat-cards">
+        <div class="stat-card stat-card--blue">
+          <div class="stat-card__label">Total Students</div>
+          <div class="stat-card__value">{{ stats?.totalStudents ?? '—' }}</div>
+        </div>
+        <div class="stat-card stat-card--green">
+          <div class="stat-card__label">Active Enrollments</div>
+          <div class="stat-card__value">{{ stats?.activeEnrollments ?? '—' }}</div>
+        </div>
+        <div class="stat-card stat-card--orange">
+          <div class="stat-card__label">Total Courses</div>
+          <div class="stat-card__value">{{ stats?.totalCourses ?? '—' }}</div>
+        </div>
+        <div class="stat-card stat-card--purple">
+          <div class="stat-card__label">Courses This Semester</div>
+          <div class="stat-card__value">{{ stats?.coursesThisSemester ?? '—' }}</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

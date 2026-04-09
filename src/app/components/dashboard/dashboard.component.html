@@ -1,27 +1,79 @@
 <div class="dashboard-container">
 
-    <div class="search-bar-row">
-        <div class="search-box">Search</div>
-        <div class="profile-box">
-            <ul>
-                <li>C</li>
-                <li>M</li>
-                <li>N</li>
-                <li>P</li>
-            </ul>
-        </div>
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="topbar-greeting">
+      <span class="greeting-label">Welcome back,</span>
+      <span class="greeting-user">{{ loggedUser }}</span>
     </div>
-    <div class="dashboard-wrapper">
-        <div class="first-wrapper">
-            <div class="dashboard"></div>
-            <div class="dashboard1"></div>
-            <div class="dashboard2"></div>
-        </div>
-        <div class="second-wrapper">
-            <div class="dashboard"></div>
-            <div class="dashboard1"></div>
-            <div class="dashboard2"></div>
-        </div>
+    <div class="topbar-right">
+      <span class="topbar-date">{{ todayDate | date:'EEEE, MMMM d, y' }}</span>
+      <button class="logout-btn" (click)="logout()">Logout</button>
     </div>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="stat-cards">
+    <div class="stat-card stat-card--blue">
+      <div class="stat-card__label">Total Students</div>
+      <div class="stat-card__value">{{ stats?.totalStudents ?? '—' }}</div>
+    </div>
+    <div class="stat-card stat-card--green">
+      <div class="stat-card__label">Active Enrollments</div>
+      <div class="stat-card__value">{{ stats?.activeEnrollments ?? '—' }}</div>
+    </div>
+    <div class="stat-card stat-card--orange">
+      <div class="stat-card__label">Total Courses</div>
+      <div class="stat-card__value">{{ stats?.totalCourses ?? '—' }}</div>
+    </div>
+    <div class="stat-card stat-card--purple">
+      <div class="stat-card__label">Courses This Semester</div>
+      <div class="stat-card__value">{{ stats?.coursesThisSemester ?? '—' }}</div>
+    </div>
+  </div>
+
+  <!-- Bottom panels -->
+  <div class="panels">
+
+    <!-- Recent Enrollments -->
+    <div class="panel panel--enrollments">
+      <h3 class="panel__title">Recent Enrollments</h3>
+      <table class="enrollment-table" *ngIf="recentEnrollments.length > 0; else noEnrollments">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Course</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let e of recentEnrollments">
+            <td>{{ e.studentName }}</td>
+            <td>{{ e.courseName }}</td>
+            <td>{{ e.enrolledAt | date:'MMM d, y' }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <ng-template #noEnrollments>
+        <p class="empty-state">No recent enrollments.</p>
+      </ng-template>
+    </div>
+
+    <!-- Mini Calendar -->
+    <div class="panel panel--calendar">
+      <h3 class="panel__title">{{ currentMonth }}</h3>
+      <div class="calendar-grid">
+        <div class="calendar-weekday" *ngFor="let d of ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']">{{ d }}</div>
+        <div
+          *ngFor="let day of calendarDays"
+          class="calendar-day"
+          [class.calendar-day--empty]="day === null"
+          [class.calendar-day--today]="isToday(day)">
+          {{ day !== null ? day : '' }}
+        </div>
+      </div>
+    </div>
+
+  </div>
 
 </div>

@@ -1,30 +1,35 @@
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
-import { Testdropdown } from '../interfaces/testdropdown';
+import { Enrollment } from '../interfaces/enrollment';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EnrollmentService {
 
-  
+  private apiUrl = `${environment.apiUrl}/enrollment`;
 
-  constructor(private router : Router,
-              private httpClient: HttpClient) {
-     
-              }
+  constructor(private httpClient: HttpClient) {}
 
-      public apiUrl = "http://localhost:8090/api/enrollment";
+  getMyEnrollments(): Observable<Enrollment[]> {
+    return this.httpClient.get<Enrollment[]>(`${this.apiUrl}/myenrollments`);
+  }
 
-      registerCourse(courseId:  number, neptunCode: string): Observable<any>{
-        return this.httpClient.post<any>(`${this.apiUrl}/addenrollment`,{courseId, neptunCode})
+  isEnrolled(courseId: number): Observable<boolean> {
+    return this.httpClient.get<boolean>(`${this.apiUrl}/isenrolled/${courseId}`);
+  }
 
-      }
+  registerCourse(courseId: number, neptunCode: string): Observable<HttpResponse<any>> {
+    return this.httpClient.post<any>(
+      `${this.apiUrl}/addenrollment`,
+      { courseId, neptunCode },
+      { observe: 'response' }
+    );
+  }
 
-  
-
-  
-
+  unregisterCourse(courseId: number): Observable<any> {
+    return this.httpClient.delete<any>(`${this.apiUrl}/${courseId}`);
+  }
 }

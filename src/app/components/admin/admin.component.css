@@ -1,43 +1,236 @@
-
-/* Style the dropdown button */
-.dropdown {
-    width: fit-content;
+/* ── Container ───────────────────────────────────────────────── */
+.admin-container {
+  padding: 24px;
+  box-sizing: border-box;
+  width: 100%;
 }
 
-.dropdown-button {
-    background-color: #3498db;
-    color: white;
-    padding: 10px;
-    font-size: 16px;
-    border: none;
-    cursor: pointer;
-  }
-  
-  /* Style the dropdown content (hidden by default) */
-  .dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: #f9f9f9;
-    min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1;
-  }
-  
-  /* Show the dropdown content on hover */
-.dropdown-content {
-    display: block;
-  }
-  
-  /* Style the dropdown items */
-  .dropdown-content p {
-    color: black;
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-  }
-  
-  /* Change color of dropdown items on hover */
-  .dropdown-content a:hover {
-    background-color: #f1f1f1;
-  }
-  
+/* ── Page header ─────────────────────────────────────────────── */
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #222;
+  margin: 0;
+}
+
+/* ── Tabs ────────────────────────────────────────────────────── */
+.tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 2px solid #e8e8e8;
+  margin-bottom: 0;
+}
+
+.tab-btn {
+  padding: 10px 22px;
+  border: none;
+  background: transparent;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #888;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.tab-btn:hover { color: #3498db; }
+
+.tab-btn--active {
+  color: #3498db;
+  border-bottom-color: #3498db;
+  font-weight: 700;
+}
+
+/* ── Tab content ─────────────────────────────────────────────── */
+.tab-content {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.tab-pane {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* ── Section ─────────────────────────────────────────────────── */
+.section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 16px 0;
+}
+
+/* ── Form ────────────────────────────────────────────────────── */
+.form-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 160px;
+}
+
+.form-field--action {
+  flex: 0 0 auto;
+}
+
+.form-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.form-input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.2s;
+  background: #fff;
+}
+
+.form-input:focus { border-color: #3498db; }
+
+/* ── Feedback ────────────────────────────────────────────────── */
+.feedback {
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+}
+
+.feedback--success { color: #2ecc71; }
+.feedback--error   { color: #e74c3c; }
+
+/* ── Buttons ─────────────────────────────────────────────────── */
+.btn {
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s;
+}
+
+.btn:disabled { opacity: 0.6; cursor: default; }
+
+.btn--primary { background: #3498db; color: #fff; }
+.btn--primary:hover:not(:disabled) { background: #2980b9; }
+
+.btn--danger  { background: #e74c3c; color: #fff; }
+.btn--danger:hover:not(:disabled)  { background: #c0392b; }
+
+.btn--sm { padding: 5px 12px; font-size: 0.8rem; }
+
+/* ── Table ───────────────────────────────────────────────────── */
+.table-wrapper {
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+thead { background: #f7f8fa; }
+
+th {
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 2px solid #eee;
+  color: #888;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+td {
+  padding: 11px 14px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #444;
+  vertical-align: middle;
+}
+
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: #fafafa; }
+
+/* ── Role badge ──────────────────────────────────────────────── */
+.role-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: #3498db22;
+  color: #3498db;
+}
+
+.role-badge--teacher {
+  background: #9b59b622;
+  color: #9b59b6;
+}
+
+/* ── Stat cards (Reports tab) ────────────────────────────────── */
+.stat-cards {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  flex: 1 1 180px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 20px 24px;
+  border-left: 5px solid transparent;
+}
+
+.stat-card--blue   { border-left-color: #3498db; }
+.stat-card--green  { border-left-color: #2ecc71; }
+.stat-card--orange { border-left-color: #e67e22; }
+.stat-card--purple { border-left-color: #9b59b6; }
+
+.stat-card__label {
+  font-size: 0.75rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.stat-card__value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #222;
+}
+
+/* ── Empty state ─────────────────────────────────────────────── */
+.empty-state {
+  color: #aaa;
+  font-size: 0.875rem;
+  padding: 16px;
+  margin: 0;
+}

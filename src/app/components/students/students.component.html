@@ -1,0 +1,91 @@
+<div class="students-container">
+
+  <div class="page-header">
+    <h2 class="page-title">Students</h2>
+    <input
+      class="search-input"
+      type="text"
+      placeholder="Search by neptun code or email..."
+      [(ngModel)]="searchTerm" />
+  </div>
+
+  <div class="table-wrapper">
+    <table *ngIf="filteredStudents.length > 0; else noStudents">
+      <thead>
+        <tr>
+          <th>Neptun Code</th>
+          <th>Email</th>
+          <th>Enrollments</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let s of filteredStudents; trackBy: trackByNeptunCode">
+
+          <!-- Main row -->
+          <tr
+            class="student-row"
+            [class.student-row--expanded]="expandedNeptunCode === s.neptunCode"
+            (click)="toggleExpand(s.neptunCode)">
+            <td class="neptun-code">{{ s.neptunCode }}</td>
+            <td>{{ s.email }}</td>
+            <td>
+              <span class="count-badge" *ngIf="s.enrollmentCount !== undefined">
+                {{ s.enrollmentCount }}
+              </span>
+            </td>
+            <td class="expand-cell">
+              <span class="expand-icon">{{ expandedNeptunCode === s.neptunCode ? '▲' : '▼' }}</span>
+            </td>
+          </tr>
+
+          <!-- Expanded enrollment detail -->
+          <tr *ngIf="expandedNeptunCode === s.neptunCode" class="detail-row">
+            <td colspan="4" class="detail-cell">
+
+              <div *ngIf="loadingNeptunCode === s.neptunCode" class="detail-loading">
+                Loading enrollments...
+              </div>
+
+              <ng-container *ngIf="loadingNeptunCode !== s.neptunCode">
+                <table class="inner-table" *ngIf="(enrollments[s.neptunCode] || []).length > 0; else noEnrollments">
+                  <thead>
+                    <tr>
+                      <th>Course</th>
+                      <th>Semester</th>
+                      <th>Credits</th>
+                      <th>Grade</th>
+                      <th>Enrolled On</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let e of enrollments[s.neptunCode]; trackBy: trackByEnrollmentId">
+                      <td>{{ e.course?.courseName ?? '—' }}</td>
+                      <td>{{ e.course?.semester?.name ?? '—' }}</td>
+                      <td>{{ e.course?.credit ?? '—' }}</td>
+                      <td>
+                        <span class="grade-badge" [class.grade-badge--empty]="!e.grade">
+                          {{ e.grade ?? '—' }}
+                        </span>
+                      </td>
+                      <td>{{ e.dateOfRegister | date:'MMM d, y' }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <ng-template #noEnrollments>
+                  <p class="empty-state">No enrollments found for this student.</p>
+                </ng-template>
+              </ng-container>
+
+            </td>
+          </tr>
+
+        </ng-container>
+      </tbody>
+    </table>
+    <ng-template #noStudents>
+      <p class="empty-state empty-state--padded">No students found.</p>
+    </ng-template>
+  </div>
+
+</div>

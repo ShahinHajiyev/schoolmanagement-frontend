@@ -1,0 +1,138 @@
+<div class="grades-container">
+
+  <div class="page-header">
+    <h2 class="page-title">Grades</h2>
+
+    <!-- Teacher: course selector -->
+    <div class="course-selector" *ngIf="isTeacher">
+      <label class="selector-label" for="courseSelect">Course</label>
+      <select
+        id="courseSelect"
+        class="form-input"
+        (change)="onCourseChange(+$any($event.target).value)">
+        <option value="" disabled selected>— Select a course —</option>
+        <option
+          *ngFor="let c of courses; trackBy: trackByCourseId"
+          [value]="c.courseId">
+          {{ c.courseName }} ({{ c.semester?.name ?? '—' }})
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ── Student view ───────────────────────────────────────── -->
+  <div class="table-wrapper" *ngIf="!isTeacher">
+    <table *ngIf="myGrades.length > 0; else noGrades">
+      <thead>
+        <tr>
+          <th>Course</th>
+          <th>Semester</th>
+          <th>Credits</th>
+          <th>Grade</th>
+          <th>Status</th>
+          <th>Enrolled On</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let e of myGrades; trackBy: trackByEnrollmentId">
+          <td class="course-name">{{ e.course.courseName }}</td>
+          <td>{{ e.course.semester?.name ?? '—' }}</td>
+          <td>{{ e.course.credit }}</td>
+          <td>
+            <span class="grade-value" [class.grade-value--empty]="!e.grade">
+              {{ e.grade ?? '—' }}
+            </span>
+          </td>
+          <td>
+            <span
+              class="status-badge"
+              [class.status-badge--pass]="gradeStatus(e.grade) === 'pass'"
+              [class.status-badge--fail]="gradeStatus(e.grade) === 'fail'"
+              [class.status-badge--pending]="gradeStatus(e.grade) === 'pending'">
+              {{ gradeLabel(e.grade) }}
+            </span>
+          </td>
+          <td>{{ e.dateOfRegister | date:'MMM d, y' }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <ng-template #noGrades>
+      <p class="empty-state">No grades available yet.</p>
+    </ng-template>
+  </div>
+
+  <!-- ── Teacher view ───────────────────────────────────────── -->
+  <ng-container *ngIf="isTeacher">
+    <div class="table-wrapper" *ngIf="selectedCourseId !== null">
+      <table *ngIf="courseEnrollments.length > 0; else noStudents">
+        <thead>
+          <tr>
+            <th>Neptun Code</th>
+            <th>Email</th>
+            <th>Enrolled On</th>
+            <th>Grade</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let e of courseEnrollments; trackBy: trackByEnrollmentId">
+            <td class="neptun-code">{{ e.student.neptunCode }}</td>
+            <td>{{ e.student.email }}</td>
+            <td>{{ e.dateOfRegister | date:'MMM d, y' }}</td>
+            <td class="grade-cell">
+
+              <!-- Viewing -->
+              <span
+                *ngIf="gradeStates[e.enrollmentId] !== 'editing'"
+                class="grade-value"
+                [class.grade-value--empty]="!e.grade">
+                {{ e.grade ?? '—' }}
+              </span>
+
+              <!-- Editing -->
+              <input
+                *ngIf="gradeStates[e.enrollmentId] === 'editing'"
+                class="grade-input"
+                type="number"
+                min="1" max="5"
+                [(ngModel)]="draftGrades[e.enrollmentId]" />
+            </td>
+            <td>
+              <span
+                class="status-badge"
+                [class.status-badge--pass]="gradeStatus(e.grade) === 'pass'"
+                [class.status-badge--fail]="gradeStatus(e.grade) === 'fail'"
+                [class.status-badge--pending]="gradeStatus(e.grade) === 'pending'">
+                {{ gradeLabel(e.grade) }}
+              </span>
+            </td>
+            <td class="actions-cell">
+              <!-- Idle -->
+              <ng-container *ngIf="gradeStates[e.enrollmentId] === 'idle'">
+                <button class="btn btn--sm btn--outline" (click)="startEdit(e.enrollmentId)">Edit</button>
+              </ng-container>
+              <!-- Editing -->
+              <ng-container *ngIf="gradeStates[e.enrollmentId] === 'editing'">
+                <button class="btn btn--sm btn--primary" (click)="saveGrade(e.enrollmentId)">Save</button>
+                <button class="btn btn--sm btn--ghost"   (click)="cancelEdit(e.enrollmentId)">Cancel</button>
+              </ng-container>
+              <!-- Loading -->
+              <span *ngIf="gradeStates[e.enrollmentId] === 'loading'" class="saving-msg">Saving...</span>
+              <!-- Error -->
+              <span *ngIf="gradeStates[e.enrollmentId] === 'error'" class="error-msg">Failed</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <ng-template #noStudents>
+        <p class="empty-state">No students enrolled in this course.</p>
+      </ng-template>
+    </div>
+
+    <p class="empty-state empty-state--padded" *ngIf="selectedCourseId === null">
+      Select a course above to view grades.
+    </p>
+  </ng-container>
+
+</div>

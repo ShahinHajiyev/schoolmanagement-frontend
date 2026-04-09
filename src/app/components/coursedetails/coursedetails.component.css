@@ -1,40 +1,216 @@
-body {
-    font-family: Arial, sans-serif;
+/* ── Container ───────────────────────────────────────────────── */
+.coursedetails-container {
+  padding: 24px;
+  box-sizing: border-box;
+  width: 100%;
 }
 
+.loading-msg {
+  padding: 24px;
+  color: #aaa;
+}
+
+/* ── Page header ─────────────────────────────────────────────── */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.page-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #222;
+  margin: 0;
+}
+
+.error-msg {
+  font-size: 0.8rem;
+  color: #e74c3c;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────── */
+.btn {
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.btn--ghost {
+  background: transparent;
+  color: #555;
+  border: 1px solid #ddd;
+  padding: 6px 14px;
+}
+
+.btn--ghost:hover {
+  background: #f5f5f5;
+}
+
+.btn--primary {
+  background: #3498db;
+  color: #fff;
+}
+
+.btn--primary:hover:not(:disabled) {
+  background: #2980b9;
+}
+
+.btn--danger {
+  background: #e74c3c;
+  color: #fff;
+}
+
+.btn--danger:hover:not(:disabled) {
+  background: #c0392b;
+}
+
+/* ── Tabs ────────────────────────────────────────────────────── */
 .tabs {
-    display: flex;
-    gap: 1px;
-    flex-wrap: wrap;
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+  border-bottom: 2px solid #e8e8e8;
+  margin-bottom: 0;
 }
 
-button {
-    min-height: 2em;
-    width: fit-content;
+.tab-btn {
+  padding: 10px 18px;
+  border: none;
+  background: transparent;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #888;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.2s, border-color 0.2s;
 }
 
-.container {
-    width: 90%;
-    margin: 0 auto;
+.tab-btn:hover {
+  color: #3498db;
 }
 
+.tab-btn--active {
+  color: #3498db;
+  border-bottom-color: #3498db;
+  font-weight: 700;
+}
+
+/* ── Tab content ─────────────────────────────────────────────── */
 .tab-content {
-    margin-top: 20px;
-    border: 1px solid black;
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
 
+.tab-pane {
+  padding: 24px;
+}
+
+/* ── Info grid (Basic Data / Lecturers) ──────────────────────── */
+.info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.info-row {
+  display: flex;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.9rem;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  flex: 0 0 180px;
+  font-weight: 600;
+  color: #888;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.info-value {
+  color: #333;
+}
+
+/* ── Students table ──────────────────────────────────────────── */
 table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
 }
 
-th,
-td {
-    border: 1px solid #ddd;
-    padding: 8px;
+thead {
+  background: #f7f8fa;
 }
 
 th {
-    background-color: #f2f2f2;
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 2px solid #eee;
+  color: #888;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+td {
+  padding: 11px 14px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #444;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+tbody tr:hover {
+  background: #fafafa;
+}
+
+/* ── Empty / coming soon states ──────────────────────────────── */
+.empty-state {
+  color: #aaa;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.coming-soon {
+  color: #bbb;
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 48px 24px;
 }

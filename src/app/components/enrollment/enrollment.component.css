@@ -1,92 +1,146 @@
+/* ── Container ───────────────────────────────────────────────── */
 .enrollment-container {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    
-}
-
-.course-table {
+  padding: 24px;
+  box-sizing: border-box;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  
+  gap: 32px;
 }
 
-table, td{  
-    border: 1px solid #1a0000;
-    text-align: left;
-    
-  }
-  
-  table {
-    border-collapse: collapse;
-    width: 100%;
-    overflow-x: auto;
-    border-radius: 1px;
-  }
-  
-  th, td {
-    padding: 15px;
-    margin: 4%;
-  }
-
-  th {
-    text-align: center;
-   
-  }
-
-  .course-names {
-    font-weight: bold;
-    cursor: pointer;
-  }
-  
-  .course-names:hover {
-    background-color: rgb(209, 209, 209);
-  } 
-  
-  .register-dropdown{
-    position: relative;
-    text-align: right;
-    font-weight: bolder;
-  }
-
-  .register-dropdown > button{
-    width: 2em;
-    font-size: 1em;
-    font-weight: bold;
-    border: 1px solid black;
-  }
-
-  .register-dropdown > button:hover{
-     background-color: rgb(209, 209, 209); 
-  }
-  
-.dropdown-content {
- 
-  position: absolute;
-  top: 100%;
-  right: 0%;
-  background-color: #ffffff;
-  min-width: 7em;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  z-index: 1;
-  text-align: center;
+/* ── Section ─────────────────────────────────────────────────── */
+.section-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #222;
+  margin: 0 0 16px 0;
 }
 
-
-.dropdown:hover .dropdown-content {
-  display: block;
-  
+/* ── Table wrapper (horizontal scroll on small screens) ──────── */
+.table-wrapper {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  overflow-x: auto;
 }
 
-.dropdown-content a {
-  color: black;
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+thead {
+  background: #f7f8fa;
+}
+
+th {
+  text-align: left;
   padding: 12px 16px;
-  text-decoration: none;
-  display: block;
+  border-bottom: 2px solid #eee;
+  color: #888;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #444;
+  vertical-align: middle;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+tbody tr:hover {
+  background: #fafafa;
+}
+
+/* ── Clickable course name ───────────────────────────────────── */
+.course-name {
+  font-weight: 600;
+  color: #3498db;
   cursor: pointer;
 }
 
+.course-name:hover {
+  text-decoration: underline;
+}
 
-.dropdown-content a:hover {
-  background-color: #f1f1f1;
+/* ── Grade badge ─────────────────────────────────────────────── */
+.grade-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  background: #2ecc71;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.grade-badge--empty {
+  background: #e0e0e0;
+  color: #aaa;
+}
+
+/* ── Action buttons ──────────────────────────────────────────── */
+.actions-cell {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  white-space: nowrap;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn--primary {
+  background: #3498db;
+  color: #fff;
+}
+
+.btn--primary:hover {
+  background: #2980b9;
+}
+
+.btn--outline {
+  background: transparent;
+  color: #3498db;
+  border: 1px solid #3498db;
+}
+
+.btn--outline:hover {
+  background: #3498db;
+  color: #fff;
+}
+
+.btn--success {
+  background: #2ecc71;
+  color: #fff;
+  cursor: default;
+}
+
+.btn--error {
+  background: #e74c3c;
+  color: #fff;
+}
+
+/* ── Empty state ─────────────────────────────────────────────── */
+.empty-state {
+  color: #aaa;
+  font-size: 0.875rem;
+  padding: 20px 16px;
+  margin: 0;
 }

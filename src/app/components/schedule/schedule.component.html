@@ -1,0 +1,48 @@
+<div class="schedule-container">
+
+  <!-- Header -->
+  <div class="page-header">
+    <h2 class="page-title">Schedule</h2>
+    <div class="week-nav">
+      <button class="btn btn--ghost" (click)="prevWeek()">&#8592;</button>
+      <span class="week-label">{{ weekLabel }}</span>
+      <button class="btn btn--ghost" (click)="nextWeek()">&#8594;</button>
+    </div>
+  </div>
+
+  <!-- Timetable -->
+  <div class="timetable-wrapper">
+    <table class="timetable">
+      <thead>
+        <tr>
+          <th class="time-col"></th>
+          <th
+            *ngFor="let day of days; let i = index; trackBy: trackByDay"
+            class="day-col"
+            [class.day-col--today]="isToday(weekDates[i])">
+            <div class="day-name">{{ day }}</div>
+            <div class="day-date">{{ weekDates[i] | date:'MMM d' }}</div>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let hour of hours; trackBy: trackByHour">
+          <td class="time-cell">{{ formatHour(hour) }}</td>
+          <td
+            *ngFor="let day of days; let di = index; trackBy: trackByDay"
+            class="slot-cell"
+            [class.slot-cell--today]="isToday(weekDates[di])">
+            <div class="entry-card" *ngIf="grid[di] && grid[di][hour - 8]">
+              <div class="entry-card__name">{{ grid[di][hour - 8]!.courseName }}</div>
+              <div class="entry-card__meta" *ngIf="grid[di][hour - 8]!.room">
+                {{ grid[di][hour - 8]!.room }}
+              </div>
+              <div class="entry-card__meta">{{ grid[di][hour - 8]!.teacherName }}</div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
