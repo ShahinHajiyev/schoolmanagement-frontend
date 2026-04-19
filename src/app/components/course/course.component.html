@@ -21,11 +21,11 @@
         <div class="course-card__meta">
           <span class="meta-item">
             <span class="meta-label">Teacher</span>
-            {{ course.teacher.firstName }} {{ course.teacher.lastName }}
+            {{ course.teacher?.firstName }} {{ course.teacher?.lastName }}
           </span>
           <span class="meta-item">
             <span class="meta-label">Semester</span>
-            {{ course.semester.name }}
+            {{ course.semester?.name }}
           </span>
           <span class="meta-item">
             <span class="meta-label">Credits</span>

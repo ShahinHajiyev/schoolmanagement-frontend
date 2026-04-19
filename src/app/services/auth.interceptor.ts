@@ -5,7 +5,7 @@ import { AuthService } from './auth.service';
 import { environment } from 'src/environments/environment';
 
 /** Routes that must never receive an Authorization header. */
-const PUBLIC_PATHS = ['/login', '/user/register', '/user/activate'];
+const PUBLIC_PATHS = ['/login', '/user/register', '/user/activate', '/user/resend-activation', '/user/forgot-password', '/user/reset-password'];
 
 @Injectable({
   providedIn: 'root'

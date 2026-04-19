@@ -12,29 +12,36 @@ import { CoursedetailsComponent } from './components/coursedetails/coursedetails
 import { StudentsComponent } from './components/students/students.component';
 import { ScheduleComponent } from './components/schedule/schedule.component';
 import { GradesComponent } from './components/grades/grades.component';
-
+import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
+import { TeacherComponent } from './components/teacher/teacher.component';
+import { TrainingComponent } from './components/training/training.component';
 
 const routes: Routes = [
 
   // Public routes — no JWT required
-  { path: 'login', component: LoginComponent },
+  { path: 'login',           component: LoginComponent },
   { path: 'login-validator', component: LoginValidatorComponent },
+  { path: 'forgot-password', component: ForgotPasswordComponent },
+  { path: 'reset-password',  component: ResetPasswordComponent },
 
   // Protected routes — canActivateChild checks JWT on every child navigation
   {
     path: '',
     canActivateChild: [canActivateChild],
     children: [
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard',     component: DashboardComponent,        canDeactivate: [canDeactivateGuard] },
-      { path: 'course',        component: CourseComponent,           canDeactivate: [canDeactivateGuard] },
-      { path: 'enrollment',    component: EnrollmentComponent },
-      { path: 'register/:courseId',     component: RegistercoursesComponent,  canDeactivate: [canDeactivateGuard] },
-      { path: 'courseDetails/:courseId', component: CoursedetailsComponent,   canDeactivate: [canDeactivateGuard] },
-      { path: 'admin',         component: AdminComponent,            canDeactivate: [canDeactivateGuard] },
-      { path: 'students',      component: StudentsComponent },
-      { path: 'schedule',      component: ScheduleComponent },
-      { path: 'grades',        component: GradesComponent },
+      { path: '',                            redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard',                   component: DashboardComponent,        canDeactivate: [canDeactivateGuard] },
+      { path: 'course',                      component: CourseComponent,           canDeactivate: [canDeactivateGuard] },
+      { path: 'enrollment',                  component: EnrollmentComponent },
+      { path: 'register/:courseId',          component: RegistercoursesComponent,  canDeactivate: [canDeactivateGuard] },
+      { path: 'courseDetails/:courseId',     component: CoursedetailsComponent,    canDeactivate: [canDeactivateGuard] },
+      { path: 'admin',                       component: AdminComponent,            canDeactivate: [canDeactivateGuard] },
+      { path: 'students',                    component: StudentsComponent },
+      { path: 'schedule',                    component: ScheduleComponent },
+      { path: 'grades',                      component: GradesComponent },
+      { path: 'teacher',                     component: TeacherComponent },
+      { path: 'training',                    component: TrainingComponent },
     ]
   },
 

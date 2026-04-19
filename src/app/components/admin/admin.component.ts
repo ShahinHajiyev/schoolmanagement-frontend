@@ -4,10 +4,14 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Course } from 'src/app/interfaces/course';
+import { Enrollment } from 'src/app/interfaces/enrollment';
+import { Semester } from 'src/app/interfaces/semester';
 import { UserDto } from 'src/app/interfaces/user-dto';
 import { AdminService } from 'src/app/services/admin.service';
 import { CourseService } from 'src/app/services/course.service';
 import { DashboardService } from 'src/app/services/dashboard.service';
+import { EnrollmentService } from 'src/app/services/enrollment.service';
+import { SemesterService } from 'src/app/services/semester.service';
 import { DashboardStats } from 'src/app/interfaces/dashboard-stats';
 import { AuthService, CanComponentDeactivate, CanDeactivateType, sharedCanDeactivate } from 'src/app/services/auth.service';
 import { RouterStateSnapshot } from '@angular/router';
@@ -21,7 +25,7 @@ type ActionState = 'idle' | 'loading' | 'success' | 'error';
 })
 export class AdminComponent implements OnInit, OnDestroy, CanComponentDeactivate {
 
-  activeTab: 'users' | 'courses' | 'reports' = 'users';
+  activeTab: 'users' | 'courses' | 'enrollments' | 'reports' = 'users';
 
   // ─── Users ───────────────────────────────────────────────────
   users: UserDto[] = [];
@@ -36,9 +40,15 @@ export class AdminComponent implements OnInit, OnDestroy, CanComponentDeactivate
 
   // ─── Courses ──────────────────────────────────────────────────
   courses: Course[] = [];
+  semesters: Semester[] = [];
   courseForm!: FormGroup;
   courseActionState: ActionState = 'idle';
   deletingCourseId: number | null = null;
+
+  // ─── Enrollments ──────────────────────────────────────────────
+  enrollments: Enrollment[] = [];
+  enrollmentsLoaded = false;
+  deletingEnrollmentId: number | null = null;
 
   // ─── Reports ──────────────────────────────────────────────────
   stats: DashboardStats | null = null;
@@ -49,6 +59,8 @@ export class AdminComponent implements OnInit, OnDestroy, CanComponentDeactivate
     private adminService: AdminService,
     private courseService: CourseService,
     private dashboardService: DashboardService,
+    private enrollmentService: EnrollmentService,
+    private semesterService: SemesterService,
     private authService: AuthService
   ) {}
 
@@ -68,6 +80,7 @@ export class AdminComponent implements OnInit, OnDestroy, CanComponentDeactivate
 
     this.loadUsers();
     this.loadCourses();
+    this.loadSemesters();
     this.loadStats();
   }
 
@@ -122,6 +135,14 @@ export class AdminComponent implements OnInit, OnDestroy, CanComponentDeactivate
       .subscribe({ next: data => this.courses = data });
   }
 
+  private loadSemesters(): void {
+    this.semesterService.getSemesters()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({ next: data => this.semesters = data });
+  }
+
+  trackBySemesterId(_index: number, s: Semester): number { return s.id; }
+
   addCourse(): void {
     if (this.courseForm.invalid || this.courseActionState === 'loading') return;
     this.courseActionState = 'loading';
@@ -158,6 +179,39 @@ export class AdminComponent implements OnInit, OnDestroy, CanComponentDeactivate
   trackByCourseId(_index: number, course: Course): number {
     return course.courseId;
   }
+
+  // ─── Tab switching ────────────────────────────────────────────
+
+  switchTab(tab: 'users' | 'courses' | 'enrollments' | 'reports'): void {
+    this.activeTab = tab;
+    if (tab === 'enrollments' && !this.enrollmentsLoaded) {
+      this.loadEnrollments();
+    }
+  }
+
+  // ─── Enrollments ──────────────────────────────────────────────
+
+  private loadEnrollments(): void {
+    this.enrollmentService.getAllEnrollments()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({ next: data => { this.enrollments = data; this.enrollmentsLoaded = true; } });
+  }
+
+  deleteEnrollment(id: number): void {
+    if (this.deletingEnrollmentId !== null) return;
+    this.deletingEnrollmentId = id;
+    this.enrollmentService.deleteEnrollment(id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.enrollments = this.enrollments.filter(e => Number(e.enrollmentId) !== id);
+          this.deletingEnrollmentId = null;
+        },
+        error: () => this.deletingEnrollmentId = null
+      });
+  }
+
+  trackByEnrollmentId(_index: number, e: Enrollment): string { return e.enrollmentId; }
 
   // ─── Reports ──────────────────────────────────────────────────
 

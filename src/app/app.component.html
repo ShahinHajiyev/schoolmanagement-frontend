@@ -1,9 +1,28 @@
 <div class="main-container">
 
-  <div class="sidebar" *ngIf="isLoggedIn$ | async">
-    <app-sidebar></app-sidebar>
+  <!-- Mobile top bar (only rendered when logged in) -->
+  <header class="mobile-topbar" *ngIf="isLoggedIn$ | async">
+    <button class="hamburger" (click)="toggleSidebar()" aria-label="Toggle menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <span class="mobile-brand">SchoolMS</span>
+  </header>
+
+  <!-- Overlay (mobile only, closes sidebar on tap) -->
+  <div
+    class="overlay"
+    *ngIf="(isLoggedIn$ | async) && sidebarOpen"
+    (click)="closeSidebar()"
+  ></div>
+
+  <!-- Sidebar -->
+  <div class="sidebar" [class.sidebar-open]="sidebarOpen" *ngIf="isLoggedIn$ | async">
+    <app-sidebar (closeRequest)="closeSidebar()"></app-sidebar>
   </div>
 
+  <!-- Page content -->
   <div class="router-container">
     <router-outlet></router-outlet>
   </div>

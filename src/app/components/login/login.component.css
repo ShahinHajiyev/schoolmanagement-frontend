@@ -67,7 +67,18 @@
     align-items: center;
     color: red;
     width: 100%;
-
 }
+
+.forgot-link {
+    font-size: 0.82rem;
+    color: #3b82f6;
+    text-decoration: none;
+    text-align: center;
+    width: 100%;
+    display: block;
+    margin-top: -8px;
+}
+
+.forgot-link:hover { text-decoration: underline; }
 
 

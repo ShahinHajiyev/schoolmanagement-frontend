@@ -39,42 +39,107 @@
             </td>
           </tr>
 
-          <!-- Expanded enrollment detail -->
+          <!-- Expanded detail -->
           <tr *ngIf="expandedNeptunCode === s.neptunCode" class="detail-row">
             <td colspan="4" class="detail-cell">
 
-              <div *ngIf="loadingNeptunCode === s.neptunCode" class="detail-loading">
-                Loading enrollments...
+              <!-- Detail tabs -->
+              <div class="detail-tabs">
+                <button
+                  class="detail-tab-btn"
+                  [class.detail-tab-btn--active]="activeDetailTab[s.neptunCode] === 'enrollments'"
+                  (click)="$event.stopPropagation(); setDetailTab(s.neptunCode, 'enrollments')">
+                  Enrollments
+                </button>
+                <button
+                  class="detail-tab-btn"
+                  [class.detail-tab-btn--active]="activeDetailTab[s.neptunCode] === 'transcript'"
+                  (click)="$event.stopPropagation(); setDetailTab(s.neptunCode, 'transcript')">
+                  Transcript
+                </button>
               </div>
 
-              <ng-container *ngIf="loadingNeptunCode !== s.neptunCode">
-                <table class="inner-table" *ngIf="(enrollments[s.neptunCode] || []).length > 0; else noEnrollments">
-                  <thead>
-                    <tr>
-                      <th>Course</th>
-                      <th>Semester</th>
-                      <th>Credits</th>
-                      <th>Grade</th>
-                      <th>Enrolled On</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr *ngFor="let e of enrollments[s.neptunCode]; trackBy: trackByEnrollmentId">
-                      <td>{{ e.course?.courseName ?? '—' }}</td>
-                      <td>{{ e.course?.semester?.name ?? '—' }}</td>
-                      <td>{{ e.course?.credit ?? '—' }}</td>
-                      <td>
-                        <span class="grade-badge" [class.grade-badge--empty]="!e.grade">
-                          {{ e.grade ?? '—' }}
-                        </span>
-                      </td>
-                      <td>{{ e.dateOfRegister | date:'MMM d, y' }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-                <ng-template #noEnrollments>
-                  <p class="empty-state">No enrollments found for this student.</p>
-                </ng-template>
+              <!-- Enrollments tab -->
+              <ng-container *ngIf="activeDetailTab[s.neptunCode] === 'enrollments'">
+                <div *ngIf="loadingNeptunCode === s.neptunCode" class="detail-loading">
+                  Loading enrollments...
+                </div>
+                <ng-container *ngIf="loadingNeptunCode !== s.neptunCode">
+                  <table class="inner-table"
+                         *ngIf="(enrollments[s.neptunCode] || []).length > 0; else noEnrollments">
+                    <thead>
+                      <tr>
+                        <th>Course</th>
+                        <th>Semester</th>
+                        <th>Credits</th>
+                        <th>Grade</th>
+                        <th>Enrolled On</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let e of enrollments[s.neptunCode]; trackBy: trackByEnrollmentId">
+                        <td>{{ e.course?.courseName ?? '—' }}</td>
+                        <td>{{ e.course?.semester?.name ?? '—' }}</td>
+                        <td>{{ e.course?.credit ?? '—' }}</td>
+                        <td>
+                          <span class="grade-badge" [class.grade-badge--empty]="!e.grade">
+                            {{ e.grade ?? '—' }}
+                          </span>
+                        </td>
+                        <td>{{ e.dateOfRegister | date:'MMM d, y' }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <ng-template #noEnrollments>
+                    <p class="empty-state">No enrollments found.</p>
+                  </ng-template>
+                </ng-container>
+              </ng-container>
+
+              <!-- Transcript tab -->
+              <ng-container *ngIf="activeDetailTab[s.neptunCode] === 'transcript'">
+                <div *ngIf="loadingTranscript === s.neptunCode" class="detail-loading">
+                  Loading transcript...
+                </div>
+                <ng-container *ngIf="loadingTranscript !== s.neptunCode">
+                  <div class="gpa-summary" *ngIf="gpas[s.neptunCode] as gpa">
+                    <span>GPA: <strong>{{ gpa.gpa | number:'1.2-2' }}</strong></span>
+                    <span>Graded courses: <strong>{{ gpa.gradedCourses }}</strong></span>
+                    <span>Total credits: <strong>{{ gpa.totalCredits }}</strong></span>
+                  </div>
+                  <table class="inner-table"
+                         *ngIf="(transcripts[s.neptunCode] || []).length > 0; else noTranscript">
+                    <thead>
+                      <tr>
+                        <th>Course</th>
+                        <th>Credits</th>
+                        <th>Grade</th>
+                        <th>Semester</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let t of transcripts[s.neptunCode]; trackBy: trackByCourseName">
+                        <td>{{ t.courseName }}</td>
+                        <td>{{ t.credit }}</td>
+                        <td>
+                          <span class="grade-badge" [class.grade-badge--empty]="!t.grade">
+                            {{ t.grade ?? '—' }}
+                          </span>
+                        </td>
+                        <td>{{ t.semesterName }}</td>
+                        <td>
+                          <span class="status-badge" [class.status-badge--done]="t.finished">
+                            {{ t.finished ? 'Finished' : 'In Progress' }}
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <ng-template #noTranscript>
+                    <p class="empty-state">No transcript data available.</p>
+                  </ng-template>
+                </ng-container>
               </ng-container>
 
             </td>
@@ -86,6 +151,13 @@
     <ng-template #noStudents>
       <p class="empty-state empty-state--padded">No students found.</p>
     </ng-template>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination" *ngIf="totalPages > 1">
+    <button class="page-btn" [disabled]="currentPage === 0" (click)="loadPage(currentPage - 1)">&#8592; Prev</button>
+    <span class="page-info">Page {{ currentPage + 1 }} of {{ totalPages }}</span>
+    <button class="page-btn" [disabled]="currentPage >= totalPages - 1" (click)="loadPage(currentPage + 1)">Next &#8594;</button>
   </div>
 
 </div>

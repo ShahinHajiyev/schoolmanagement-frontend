@@ -59,6 +59,7 @@
       <button (click)="showLoginForm()"    *ngIf="activeView === 'register'">Back to Login</button>
       <button (click)="showRegisterForm()" *ngIf="activeView === 'login'">Register</button>
     </div>
+    <a class="forgot-link" routerLink="/forgot-password" *ngIf="activeView === 'login'">Forgot password?</a>
 
   </div>
 </div>

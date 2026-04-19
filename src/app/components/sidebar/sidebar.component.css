@@ -19,6 +19,25 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+.close-btn {
+  display: none; /* shown only on mobile via media query */
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  margin-right: 2px;
+}
+
+.close-btn:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+}
+
 .brand-icon {
   display: flex;
   align-items: center;
@@ -154,4 +173,11 @@
 .logout-btn:hover {
   background-color: rgba(239, 68, 68, 0.15);
   color: #f87171;
+}
+
+/* ── Mobile ──────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .close-btn {
+    display: flex;
+  }
 }

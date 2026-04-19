@@ -15,6 +15,7 @@ export class LoginValidatorComponent implements OnInit, CanComponentDeactivate {
   activationForm!: FormGroup;
   errorStatus: number | null = null;
   isLoading = false;
+  resendState: 'idle' | 'loading' | 'success' | 'error' = 'idle';
 
   // I8: neptunCode read from query param — not from a mutable service field
   readonly neptunCode: string;
@@ -35,6 +36,17 @@ export class LoginValidatorComponent implements OnInit, CanComponentDeactivate {
 
   canDeactivate(_currentState: RouterStateSnapshot, nextState: RouterStateSnapshot): CanDeactivateType {
     return sharedCanDeactivate(this.authService, nextState);
+  }
+
+  resendCode(): void {
+    if (this.resendState === 'loading') return;
+    this.resendState = 'loading';
+    this.authService.resendActivationCode(this.neptunCode)
+      .pipe(take(1))
+      .subscribe({
+        next: () => { this.resendState = 'success'; },
+        error: () => { this.resendState = 'error'; }
+      });
   }
 
   activateAccount(): void {

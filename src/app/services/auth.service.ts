@@ -12,7 +12,14 @@ import { LocalStorageService } from './local-storage.service';
 import { JwtPayload } from '../interfaces/jwt-payload';
 import { environment } from 'src/environments/environment';
 
-const AUTH_TOKEN_KEY = 'auth-token';
+const AUTH_TOKEN_KEY    = 'auth-token';
+const REFRESH_TOKEN_KEY = 'sms_refresh_token';
+
+interface TokenResponseDto {
+  accessToken: string;
+  refreshToken: string;
+  tokenType: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -134,6 +141,10 @@ export class AuthService {
       tap((response: HttpResponse<any>) => {
         const token = response.headers.get('Authorization');
         if (token) this.setOrUpdateAuthToken(token);
+        const body = response.body as TokenResponseDto | null;
+        if (body?.refreshToken) {
+          this.localStorageService.set<string>(REFRESH_TOKEN_KEY, body.refreshToken, Date.now() + 7 * 24 * 60 * 60 * 1000);
+        }
       }),
       catchError(e => this.handleError(e))
     );
@@ -150,12 +161,43 @@ export class AuthService {
       this.expiryTimer = null;
     }
     this.stopActivityListeners();
+    // Fire-and-forget — clear local state regardless of response
+    const token = this.getAuthToken();
+    if (token) {
+      this.http.post(`${this.apiUrl}/auth/logout`, {}).subscribe({ error: () => {} });
+    }
     this.localStorageService.remove(AUTH_TOKEN_KEY);
+    this.localStorageService.remove(REFRESH_TOKEN_KEY);
     this.refreshExpiredState();
+  }
+
+  refreshToken(): Observable<TokenResponseDto> {
+    const refreshToken = this.localStorageService.get<string>(REFRESH_TOKEN_KEY);
+    return this.http.post<TokenResponseDto>(`${this.apiUrl}/auth/refresh`, { refreshToken }).pipe(
+      tap(res => {
+        this.setOrUpdateAuthToken(res.accessToken);
+        this.localStorageService.set<string>(REFRESH_TOKEN_KEY, res.refreshToken, Date.now() + 7 * 24 * 60 * 60 * 1000);
+      })
+    );
+  }
+
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/user/forgot-password`, { email });
+  }
+
+  resetPassword(resetToken: string, newPassword: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/user/reset-password`, { resetToken, newPassword });
   }
 
   completeLogout(): void {
     this.logoutInProcess = false;
+  }
+
+  resendActivationCode(neptunCode: string): Observable<any> {
+    return this.http.post<any>(
+      `${this.apiUrl}/user/resend-activation?neptunCode=${encodeURIComponent(neptunCode)}`,
+      {}
+    ).pipe(catchError(e => this.handleError(e)));
   }
 
   activateAccount(activationCode: string, neptunCode: string): Observable<any> {
@@ -252,7 +294,8 @@ export const canActivate: CanActivateFn = (
     return router.createUrlTree(['/login']);
   }
 
-  if (state.url.includes('/admin') && !authService.isAdmin()) {
+  const adminOnlyPaths = ['/admin', '/students', '/dashboard'];
+  if (adminOnlyPaths.some(p => state.url.startsWith(p)) && !authService.isAdmin()) {
     return router.createUrlTree(['/course']);
   }
 

@@ -8,6 +8,15 @@ import { AuthService } from './services/auth.service';
 })
 export class AppComponent {
   readonly isLoggedIn$ = this.authService.isLoggedIn$;
+  sidebarOpen = false;
 
   constructor(private authService: AuthService) {}
+
+  toggleSidebar(): void {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  closeSidebar(): void {
+    this.sidebarOpen = false;
+  }
 }

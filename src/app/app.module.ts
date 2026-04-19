@@ -17,6 +17,10 @@ import { CoursedetailsComponent } from './components/coursedetails/coursedetails
 import { StudentsComponent } from './components/students/students.component';
 import { ScheduleComponent } from './components/schedule/schedule.component';
 import { GradesComponent } from './components/grades/grades.component';
+import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
+import { TeacherComponent } from './components/teacher/teacher.component';
+import { TrainingComponent } from './components/training/training.component';
 
 import { AuthInterceptor } from './services/auth.interceptor';
 import { JWT_OPTIONS, JwtHelperService } from '@auth0/angular-jwt';
@@ -35,7 +39,11 @@ import { JWT_OPTIONS, JwtHelperService } from '@auth0/angular-jwt';
     CoursedetailsComponent,
     StudentsComponent,
     ScheduleComponent,
-    GradesComponent
+    GradesComponent,
+    ForgotPasswordComponent,
+    ResetPasswordComponent,
+    TeacherComponent,
+    TrainingComponent
   ],
   imports: [
     BrowserModule,

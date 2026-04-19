@@ -32,4 +32,12 @@ export class EnrollmentService {
   unregisterCourse(courseId: number): Observable<any> {
     return this.httpClient.delete<any>(`${this.apiUrl}/${courseId}`);
   }
+
+  getAllEnrollments(): Observable<Enrollment[]> {
+    return this.httpClient.get<Enrollment[]>(`${this.apiUrl}/getallenrollments`);
+  }
+
+  deleteEnrollment(id: number): Observable<any> {
+    return this.httpClient.delete<any>(`${this.apiUrl}/deleteenrollment/${id}`);
+  }
 }

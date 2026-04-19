@@ -201,6 +201,83 @@ tbody tr:hover {
   background: #fafafa;
 }
 
+/* ── Section divider + header ────────────────────────────────── */
+.section-divider {
+  height: 1px;
+  background: #eee;
+  margin: 20px 0;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #444;
+  margin: 0;
+}
+
+.btn--sm { padding: 5px 12px; font-size: 0.8rem; }
+
+/* ── Details edit form ───────────────────────────────────────── */
+.details-form { display: flex; flex-direction: column; gap: 16px; }
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-field label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.form-input {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus { border-color: #3498db; }
+
+.form-field--action { justify-content: flex-end; }
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.feedback { font-size: 0.85rem; margin: 0; padding: 8px 12px; border-radius: 6px; }
+.feedback--error { color: #ef4444; background: #fef2f2; border: 1px solid #fecaca; }
+
+/* ── Schedule form ───────────────────────────────────────────── */
+.schedule-form { margin-bottom: 20px; }
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+}
+
 /* ── Empty / coming soon states ──────────────────────────────── */
 .empty-state {
   color: #aaa;

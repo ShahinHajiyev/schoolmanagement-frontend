@@ -1,0 +1,94 @@
+<div class="teacher-container">
+
+  <div class="page-header">
+    <h2 class="page-title">{{ isAdmin ? 'Teachers' : 'My Courses' }}</h2>
+  </div>
+
+  <!-- ── Admin view: teacher list ─────────────────────────────── -->
+  <div class="table-wrapper" *ngIf="isAdmin">
+    <table *ngIf="teachers.length > 0; else noTeachers">
+      <thead>
+        <tr>
+          <th>First Name</th>
+          <th>Last Name</th>
+          <th>Neptun Code</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let t of teachers; trackBy: trackByUserId">
+          <td>{{ t.firstName }}</td>
+          <td>{{ t.lastName }}</td>
+          <td class="neptun-code">{{ t.neptunCode ?? '—' }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <ng-template #noTeachers>
+      <p class="empty-state empty-state--padded">No teachers found.</p>
+    </ng-template>
+  </div>
+
+  <!-- ── Teacher view: my courses + expandable students ───────── -->
+  <div class="table-wrapper" *ngIf="!isAdmin">
+    <table *ngIf="courses.length > 0; else noCourses">
+      <thead>
+        <tr>
+          <th>Course</th>
+          <th>Credits</th>
+          <th>Semester</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let c of courses; trackBy: trackByCourseId">
+
+          <tr class="course-row"
+              [class.course-row--expanded]="expandedCourseId === c.courseId"
+              (click)="toggleExpand(c.courseId)">
+            <td class="course-name">{{ c.courseName }}</td>
+            <td>{{ c.credit }}</td>
+            <td>{{ c.semester?.name ?? '—' }}</td>
+            <td class="expand-cell">
+              <span class="expand-icon">{{ expandedCourseId === c.courseId ? '▲' : '▼' }}</span>
+            </td>
+          </tr>
+
+          <tr *ngIf="expandedCourseId === c.courseId" class="detail-row">
+            <td colspan="4" class="detail-cell">
+
+              <div *ngIf="loadingCourseId === c.courseId" class="detail-loading">
+                Loading students...
+              </div>
+
+              <ng-container *ngIf="loadingCourseId !== c.courseId">
+                <table class="inner-table"
+                       *ngIf="(courseStudents[c.courseId] || []).length > 0; else noStudents">
+                  <thead>
+                    <tr>
+                      <th>Neptun Code</th>
+                      <th>Email</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let s of courseStudents[c.courseId]; trackBy: trackByNeptunCode">
+                      <td class="neptun-code">{{ s.neptunCode }}</td>
+                      <td>{{ s.email }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <ng-template #noStudents>
+                  <p class="empty-state">No students enrolled in this course.</p>
+                </ng-template>
+              </ng-container>
+
+            </td>
+          </tr>
+
+        </ng-container>
+      </tbody>
+    </table>
+    <ng-template #noCourses>
+      <p class="empty-state empty-state--padded">No courses assigned.</p>
+    </ng-template>
+  </div>
+
+</div>

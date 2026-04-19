@@ -8,18 +8,12 @@
     </div>
     <div class="header-right">
       <span *ngIf="enrollActionState === 'error'" class="error-msg">Action failed. Try again.</span>
-      <button
-        *ngIf="!isEnrolled"
-        class="btn btn--primary"
-        [disabled]="enrollActionState === 'loading'"
-        (click)="register()">
+      <button *ngIf="!isEnrolled" class="btn btn--primary"
+        [disabled]="enrollActionState === 'loading'" (click)="register()">
         {{ enrollActionState === 'loading' ? '...' : 'Register' }}
       </button>
-      <button
-        *ngIf="isEnrolled"
-        class="btn btn--danger"
-        [disabled]="enrollActionState === 'loading'"
-        (click)="unregister()">
+      <button *ngIf="isEnrolled" class="btn btn--danger"
+        [disabled]="enrollActionState === 'loading'" (click)="unregister()">
         {{ enrollActionState === 'loading' ? '...' : 'Unregister' }}
       </button>
     </div>
@@ -39,77 +33,161 @@
   <!-- Tab content -->
   <div class="tab-content" [ngSwitch]="selectedTabId">
 
-    <!-- Basic Data -->
+    <!-- ── Basic Data ──────────────────────────────────────────── -->
     <div *ngSwitchCase="'basicData'" class="tab-pane">
+
+      <!-- Core course info (always shown) -->
       <div class="info-grid">
-        <div class="info-row">
-          <span class="info-label">Course ID</span>
-          <span class="info-value">{{ course.courseId }}</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Course Name</span>
-          <span class="info-value">{{ course.courseName }}</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Credits</span>
-          <span class="info-value">{{ course.credit }}</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Semester</span>
-          <span class="info-value">{{ course.semester?.name ?? '—' }}</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Lecturer</span>
-          <span class="info-value">{{ course.teacher?.firstName ?? '—' }} {{ course.teacher?.lastName ?? '' }}</span>
-        </div>
+        <div class="info-row"><span class="info-label">Course ID</span><span class="info-value">{{ course.courseId }}</span></div>
+        <div class="info-row"><span class="info-label">Course Name</span><span class="info-value">{{ course.courseName }}</span></div>
+        <div class="info-row"><span class="info-label">Credits</span><span class="info-value">{{ course.credit }}</span></div>
+        <div class="info-row"><span class="info-label">Semester</span><span class="info-value">{{ course.semester?.name ?? '—' }}</span></div>
+        <div class="info-row"><span class="info-label">Lecturer</span><span class="info-value">{{ course.teacher?.firstName ?? '—' }} {{ course.teacher?.lastName ?? '' }}</span></div>
       </div>
+
+      <!-- Extended details -->
+      <ng-container *ngIf="courseDetails">
+        <div class="section-divider"></div>
+
+        <!-- View mode -->
+        <ng-container *ngIf="!editingDetails">
+          <div class="section-header">
+            <h4 class="section-title">Details</h4>
+            <button *ngIf="isAdmin" class="btn btn--ghost btn--sm" (click)="startEditDetails()">Edit</button>
+          </div>
+          <div class="info-grid">
+            <div class="info-row"><span class="info-label">Course Code</span><span class="info-value">{{ courseDetails.courseCode }}</span></div>
+            <div class="info-row"><span class="info-label">Exam Type</span><span class="info-value">{{ courseDetails.examType }}</span></div>
+            <div class="info-row"><span class="info-label">Course Type</span><span class="info-value">{{ courseDetails.courseType }}</span></div>
+            <div class="info-row"><span class="info-label">Language</span><span class="info-value">{{ courseDetails.languageName }}</span></div>
+            <div class="info-row"><span class="info-label">Organization</span><span class="info-value">{{ courseDetails.organizationName }}</span></div>
+            <div class="info-row"><span class="info-label">Price</span><span class="info-value">{{ courseDetails.coursePrice }}</span></div>
+            <div class="info-row"><span class="info-label">Min/Max Headcount</span><span class="info-value">{{ courseDetails.minHeadcount }} / {{ courseDetails.maxHeadcount }}</span></div>
+            <div class="info-row"><span class="info-label">Classes/Week</span><span class="info-value">{{ courseDetails.classPerWeek }}</span></div>
+            <div class="info-row"><span class="info-label">Classes/Term</span><span class="info-value">{{ courseDetails.classPerTerm }}</span></div>
+            <div class="info-row"><span class="info-label">Prerequisite</span><span class="info-value">{{ courseDetails.preliminaryRequirement || '—' }}</span></div>
+            <div class="info-row"><span class="info-label">Internet</span><span class="info-value">{{ courseDetails.internetAddress || '—' }}</span></div>
+          </div>
+        </ng-container>
+
+        <!-- Edit mode -->
+        <ng-container *ngIf="editingDetails">
+          <div class="section-header">
+            <h4 class="section-title">Edit Details</h4>
+          </div>
+          <form class="details-form" [formGroup]="detailsForm" (ngSubmit)="saveDetails()">
+            <div class="form-grid">
+              <div class="form-field"><label>Course Code</label><input class="form-input" formControlName="courseCode" /></div>
+              <div class="form-field"><label>Exam Type</label><input class="form-input" formControlName="examType" /></div>
+              <div class="form-field"><label>Course Type</label><input class="form-input" formControlName="courseType" /></div>
+              <div class="form-field"><label>Language</label><input class="form-input" formControlName="languageName" /></div>
+              <div class="form-field"><label>Organization</label><input class="form-input" formControlName="organizationName" /></div>
+              <div class="form-field"><label>Price</label><input class="form-input" type="number" formControlName="coursePrice" /></div>
+              <div class="form-field"><label>Min Headcount</label><input class="form-input" type="number" formControlName="minHeadcount" /></div>
+              <div class="form-field"><label>Max Headcount</label><input class="form-input" type="number" formControlName="maxHeadcount" /></div>
+              <div class="form-field"><label>Classes/Week</label><input class="form-input" type="number" formControlName="classPerWeek" /></div>
+              <div class="form-field"><label>Classes/Term</label><input class="form-input" type="number" formControlName="classPerTerm" /></div>
+              <div class="form-field"><label>Prerequisite</label><input class="form-input" formControlName="preliminaryRequirement" /></div>
+              <div class="form-field"><label>Internet Address</label><input class="form-input" formControlName="internetAddress" /></div>
+            </div>
+            <p class="feedback feedback--error" *ngIf="detailsSaveState === 'error'">Save failed. Try again.</p>
+            <div class="form-actions">
+              <button type="submit" class="btn btn--primary" [disabled]="detailsForm.invalid || detailsSaveState === 'loading'">
+                {{ detailsSaveState === 'loading' ? 'Saving...' : 'Save' }}
+              </button>
+              <button type="button" class="btn btn--ghost" (click)="cancelEditDetails()">Cancel</button>
+            </div>
+          </form>
+        </ng-container>
+      </ng-container>
     </div>
 
-    <!-- Students -->
+    <!-- ── Students ────────────────────────────────────────────── -->
     <div *ngSwitchCase="'students'" class="tab-pane">
       <table *ngIf="enrolledStudents.length > 0; else noStudents">
-        <thead>
-          <tr>
-            <th>Neptun Code</th>
-            <th>Email</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Neptun Code</th><th>Email</th></tr></thead>
         <tbody>
           <tr *ngFor="let s of enrolledStudents; trackBy: trackByNeptunCode">
-            <td>{{ s.neptunCode }}</td>
-            <td>{{ s.email }}</td>
+            <td>{{ s.neptunCode }}</td><td>{{ s.email }}</td>
           </tr>
         </tbody>
       </table>
-      <ng-template #noStudents>
-        <p class="empty-state">No students enrolled yet.</p>
-      </ng-template>
+      <ng-template #noStudents><p class="empty-state">No students enrolled yet.</p></ng-template>
     </div>
 
-    <!-- Lecturers -->
+    <!-- ── Lecturers ───────────────────────────────────────────── -->
     <div *ngSwitchCase="'lecturers'" class="tab-pane">
       <div class="info-grid" *ngIf="course.teacher; else noTeacher">
-        <div class="info-row">
-          <span class="info-label">First Name</span>
-          <span class="info-value">{{ course.teacher.firstName }}</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Last Name</span>
-          <span class="info-value">{{ course.teacher.lastName }}</span>
-        </div>
+        <div class="info-row"><span class="info-label">First Name</span><span class="info-value">{{ course.teacher.firstName }}</span></div>
+        <div class="info-row"><span class="info-label">Last Name</span><span class="info-value">{{ course.teacher.lastName }}</span></div>
       </div>
-      <ng-template #noTeacher>
-        <p class="empty-state">No lecturer assigned.</p>
-      </ng-template>
+      <ng-template #noTeacher><p class="empty-state">No lecturer assigned.</p></ng-template>
+    </div>
+
+    <!-- ── Class Schedule ──────────────────────────────────────── -->
+    <div *ngSwitchCase="'classSchedule'" class="tab-pane">
+
+      <!-- Add form (admin only) -->
+      <ng-container *ngIf="isAdmin">
+        <form class="schedule-form" [formGroup]="scheduleForm" (ngSubmit)="addSchedule()">
+          <div class="form-row">
+            <div class="form-field">
+              <label>Day</label>
+              <select class="form-input" formControlName="dayOfWeek">
+                <option value="" disabled>— Day —</option>
+                <option *ngFor="let d of days" [value]="d">{{ d }}</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Start (HH:MM)</label>
+              <input class="form-input" formControlName="startTime" placeholder="08:00" />
+            </div>
+            <div class="form-field">
+              <label>End (HH:MM)</label>
+              <input class="form-input" formControlName="endTime" placeholder="10:00" />
+            </div>
+            <div class="form-field">
+              <label>Room</label>
+              <input class="form-input" formControlName="room" placeholder="A101" />
+            </div>
+            <div class="form-field form-field--action">
+              <button type="submit" class="btn btn--primary"
+                [disabled]="scheduleForm.invalid || addScheduleState === 'loading'">
+                {{ addScheduleState === 'loading' ? 'Adding...' : 'Add' }}
+              </button>
+            </div>
+          </div>
+          <p class="feedback feedback--error" *ngIf="addScheduleState === 'error'">Failed to add. Try again.</p>
+        </form>
+      </ng-container>
+
+      <table *ngIf="scheduleEntries.length > 0; else noSchedule">
+        <thead><tr><th>Day</th><th>Start</th><th>End</th><th>Room</th><th *ngIf="isAdmin"></th></tr></thead>
+        <tbody>
+          <tr *ngFor="let e of scheduleEntries; trackBy: trackByScheduleId">
+            <td>{{ e.dayOfWeek }}</td>
+            <td>{{ e.startTime }}</td>
+            <td>{{ e.endTime }}</td>
+            <td>{{ e.room }}</td>
+            <td *ngIf="isAdmin">
+              <button class="btn btn--danger btn--sm"
+                [disabled]="deletingScheduleId === e.id"
+                (click)="deleteSchedule(e.id!)">
+                {{ deletingScheduleId === e.id ? '...' : 'Delete' }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <ng-template #noSchedule><p class="empty-state">No schedule entries yet.</p></ng-template>
     </div>
 
     <!-- Placeholder tabs -->
-    <div *ngSwitchCase="'textbooks'" class="tab-pane coming-soon">Coming soon</div>
-    <div *ngSwitchCase="'classSchedule'" class="tab-pane coming-soon">Coming soon</div>
-    <div *ngSwitchCase="'attendanceStatistics'" class="tab-pane coming-soon">Coming soon</div>
-    <div *ngSwitchCase="'tasks'" class="tab-pane coming-soon">Coming soon</div>
-    <div *ngSwitchCase="'eMaterials'" class="tab-pane coming-soon">Coming soon</div>
-    <div *ngSwitchCase="'rankedRegistration'" class="tab-pane coming-soon">Coming soon</div>
+    <div *ngSwitchCase="'textbooks'"            class="tab-pane coming-soon">Coming soon</div>
+    <div *ngSwitchCase="'attendanceStatistics'"  class="tab-pane coming-soon">Coming soon</div>
+    <div *ngSwitchCase="'tasks'"                class="tab-pane coming-soon">Coming soon</div>
+    <div *ngSwitchCase="'eMaterials'"           class="tab-pane coming-soon">Coming soon</div>
+    <div *ngSwitchCase="'rankedRegistration'"   class="tab-pane coming-soon">Coming soon</div>
 
   </div>
 </div>

@@ -1,0 +1,77 @@
+<div class="training-container">
+
+  <div class="page-header">
+    <h2 class="page-title">{{ isAdmin ? 'All Trainings' : 'My Training' }}</h2>
+  </div>
+
+  <!-- ── Student view ──────────────────────────────────────────── -->
+  <ng-container *ngIf="!isAdmin">
+    <div class="detail-card" *ngIf="myTraining; else noData">
+      <div class="detail-row">
+        <span class="detail-label">Program</span>
+        <span class="detail-value">{{ myTraining.programName }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Module</span>
+        <span class="detail-value">{{ myTraining.module }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Status</span>
+        <span class="status-badge" [class.status-badge--active]="myTraining.status === 'ACTIVE'">
+          {{ myTraining.status }}
+        </span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Terms</span>
+        <span class="detail-value">{{ myTraining.numberOfTerms }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Language</span>
+        <span class="detail-value">{{ myTraining.languageName }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Organization</span>
+        <span class="detail-value">{{ myTraining.organizationName }}</span>
+      </div>
+    </div>
+    <ng-template #noData>
+      <p class="empty-state empty-state--padded">No training assigned.</p>
+    </ng-template>
+  </ng-container>
+
+  <!-- ── Admin view ────────────────────────────────────────────── -->
+  <div class="table-wrapper" *ngIf="isAdmin">
+    <table *ngIf="allTrainings.length > 0; else noTrainings">
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Program</th>
+          <th>Module</th>
+          <th>Status</th>
+          <th>Terms</th>
+          <th>Language</th>
+          <th>Organization</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let t of allTrainings; trackBy: trackByTrainingId">
+          <td class="neptun-code">{{ t.studentNeptunCode }}</td>
+          <td>{{ t.programName }}</td>
+          <td>{{ t.module }}</td>
+          <td>
+            <span class="status-badge" [class.status-badge--active]="t.status === 'ACTIVE'">
+              {{ t.status }}
+            </span>
+          </td>
+          <td>{{ t.numberOfTerms }}</td>
+          <td>{{ t.languageName }}</td>
+          <td>{{ t.organizationName }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <ng-template #noTrainings>
+      <p class="empty-state empty-state--padded">No trainings found.</p>
+    </ng-template>
+  </div>
+
+</div>
