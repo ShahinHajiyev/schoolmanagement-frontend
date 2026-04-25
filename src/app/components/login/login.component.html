@@ -47,7 +47,7 @@
       </div>
       <br>
       <div *ngIf="errorStatus" class="error-message">
-        Registration failed ({{ errorStatus }}).
+        {{ registerErrorMessage ?? 'Registration failed. Check your details and try again.' }}
       </div>
       <button class="inputbox" type="submit" [disabled]="registrationForm.invalid || isLoading">
         {{ isLoading ? 'Registering…' : 'Register' }}

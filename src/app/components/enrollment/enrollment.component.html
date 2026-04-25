@@ -75,6 +75,9 @@
                 <span *ngIf="registerState[course.courseId] === 'error'">Retry</span>
                 <span *ngIf="registerState[course.courseId] === 'idle' || !registerState[course.courseId]">Register</span>
               </button>
+              <span class="error-msg" *ngIf="registerState[course.courseId] === 'error' && registerErrors[course.courseId]">
+                {{ registerErrors[course.courseId] }}
+              </span>
             </td>
           </tr>
         </tbody>

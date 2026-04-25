@@ -66,8 +66,8 @@ export class StudentsComponent implements OnInit, OnDestroy {
     const term = this.searchTerm.trim().toLowerCase();
     if (!term) return this.students;
     return this.students.filter(s =>
-      s.neptunCode.toLowerCase().includes(term) ||
-      s.email.toLowerCase().includes(term)
+      s.neptunCode?.toLowerCase().includes(term) ||
+      s.email?.toLowerCase().includes(term)
     );
   }
 

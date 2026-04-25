@@ -4,5 +4,8 @@
         <p><strong>Preconditions: </strong>ok</p>
         <p><strong>Attendance: </strong>ok</p>
     </div>
-    <button (click)="registerCourse()"  >Register</button>
+    <button (click)="registerCourse()" [disabled]="isLoading">
+        {{ isLoading ? 'Registering...' : 'Register' }}
+    </button>
+    <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
 </div>

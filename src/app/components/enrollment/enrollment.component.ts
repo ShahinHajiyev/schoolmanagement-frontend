@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Course } from 'src/app/interfaces/course';
 import { Enrollment } from 'src/app/interfaces/enrollment';
 import { AuthService } from 'src/app/services/auth.service';
@@ -19,6 +20,7 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
 
   // Per-row state: courseId → 'idle' | 'loading' | 'success' | 'error'
   registerState: Record<number, 'idle' | 'loading' | 'success' | 'error'> = {};
+  registerErrors: Record<number, string | null> = {};
 
   private destroy$ = new Subject<void>();
 
@@ -50,7 +52,7 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
       .subscribe({
         next: data => {
           this.availableCourses = data;
-          data.forEach(c => this.registerState[c.courseId] = 'idle');
+          data.forEach(c => { this.registerState[c.courseId] = 'idle'; this.registerErrors[c.courseId] = null; });
         }
       });
   }
@@ -60,6 +62,7 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
     if (!neptunCode || this.registerState[courseId] === 'loading') return;
 
     this.registerState[courseId] = 'loading';
+    this.registerErrors[courseId] = null;
     this.enrollmentService.registerCourse(courseId, neptunCode)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -68,8 +71,9 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
           this.loadMyEnrollments();
           this.loadAvailableCourses();
         },
-        error: () => {
+        error: (e: HttpErrorResponse) => {
           this.registerState[courseId] = 'error';
+          this.registerErrors[courseId] = (e.error && typeof e.error === 'object') ? (e.error.message ?? null) : null;
         }
       });
   }

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from 'src/app/services/auth.service';
 
 const passwordMatchValidator: ValidatorFn = (form: AbstractControl): ValidationErrors | null => {
@@ -17,6 +18,7 @@ const passwordMatchValidator: ValidatorFn = (form: AbstractControl): ValidationE
 export class ResetPasswordComponent implements OnInit {
 
   submitState: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+  errorMessage: string | null = null;
   private resetToken = '';
 
   form = new FormGroup({
@@ -44,7 +46,10 @@ export class ResetPasswordComponent implements OnInit {
           this.submitState = 'success';
           setTimeout(() => this.router.navigate(['/login']), 2000);
         },
-        error: () => this.submitState = 'error'
+        error: (e: HttpErrorResponse) => {
+          this.submitState = 'error';
+          this.errorMessage = (e.error && typeof e.error === 'object') ? (e.error.message ?? null) : null;
+        }
       });
   }
 }

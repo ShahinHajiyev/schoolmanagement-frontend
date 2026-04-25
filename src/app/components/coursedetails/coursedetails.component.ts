@@ -3,6 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { switchMap, takeUntil } from 'rxjs/operators';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Course } from 'src/app/interfaces/course';
 import { CourseDetails } from 'src/app/interfaces/course-details';
 import { CourseSchedule } from 'src/app/interfaces/course-schedule';
@@ -25,19 +26,23 @@ export class CoursedetailsComponent implements OnInit, OnDestroy {
   isEnrolled = false;
   isAdmin = false;
   enrollActionState: ActionState = 'idle';
+  enrollErrorMessage: string | null = null;
 
   // ─── Basic Data tab ───────────────────────────────────────────
   courseDetails: CourseDetails | null = null;
   editingDetails = false;
   detailsSaveState: ActionState = 'idle';
+  detailsSaveErrorMessage: string | null = null;
   detailsForm!: FormGroup;
 
   // ─── Class Schedule tab ───────────────────────────────────────
   scheduleEntries: CourseSchedule[] = [];
   scheduleLoaded = false;
   deletingScheduleId: number | null = null;
+  deleteScheduleError: string | null = null;
   scheduleForm!: FormGroup;
   addScheduleState: ActionState = 'idle';
+  scheduleAddErrorMessage: string | null = null;
 
   readonly days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -127,22 +132,30 @@ export class CoursedetailsComponent implements OnInit, OnDestroy {
     const neptunCode = this.authService.getLoggedUserSync();
     if (!neptunCode || this.enrollActionState === 'loading') return;
     this.enrollActionState = 'loading';
+    this.enrollErrorMessage = null;
     this.enrollmentService.registerCourse(this.courseId, neptunCode)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => { this.isEnrolled = true; this.enrollActionState = 'idle'; this.loadEnrolledStudents(); },
-        error: () => this.enrollActionState = 'error'
+        error: (e: HttpErrorResponse) => {
+          this.enrollActionState = 'error';
+          this.enrollErrorMessage = (e.error && typeof e.error === 'object') ? (e.error.message ?? null) : null;
+        }
       });
   }
 
   unregister(): void {
     if (this.enrollActionState === 'loading') return;
     this.enrollActionState = 'loading';
+    this.enrollErrorMessage = null;
     this.enrollmentService.unregisterCourse(this.courseId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => { this.isEnrolled = false; this.enrollActionState = 'idle'; this.loadEnrolledStudents(); },
-        error: () => this.enrollActionState = 'error'
+        error: (e: HttpErrorResponse) => {
+          this.enrollActionState = 'error';
+          this.enrollErrorMessage = (e.error && typeof e.error === 'object') ? (e.error.message ?? null) : null;
+        }
       });
   }
 
@@ -171,6 +184,7 @@ export class CoursedetailsComponent implements OnInit, OnDestroy {
   saveDetails(): void {
     if (this.detailsForm.invalid || this.detailsSaveState === 'loading') return;
     this.detailsSaveState = 'loading';
+    this.detailsSaveErrorMessage = null;
     this.courseService.saveCourseDetails(this.courseId, this.detailsForm.value as CourseDetails)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -179,7 +193,10 @@ export class CoursedetailsComponent implements OnInit, OnDestroy {
           this.editingDetails = false;
           this.detailsSaveState = 'idle';
         },
-        error: () => this.detailsSaveState = 'error'
+        error: (e: HttpErrorResponse) => {
+          this.detailsSaveState = 'error';
+          this.detailsSaveErrorMessage = (e.error && typeof e.error === 'object') ? (e.error.message ?? null) : null;
+        }
       });
   }
 
@@ -201,6 +218,7 @@ export class CoursedetailsComponent implements OnInit, OnDestroy {
   addSchedule(): void {
     if (this.scheduleForm.invalid || this.addScheduleState === 'loading') return;
     this.addScheduleState = 'loading';
+    this.scheduleAddErrorMessage = null;
     const { dayOfWeek, startTime, endTime, room } = this.scheduleForm.value;
     this.courseService.addCourseSchedule(this.courseId, { dayOfWeek, startTime, endTime, room })
       .pipe(takeUntil(this.destroy$))
@@ -210,13 +228,17 @@ export class CoursedetailsComponent implements OnInit, OnDestroy {
           this.scheduleForm.reset();
           this.loadSchedule();
         },
-        error: () => this.addScheduleState = 'error'
+        error: (e: HttpErrorResponse) => {
+          this.addScheduleState = 'error';
+          this.scheduleAddErrorMessage = (e.error && typeof e.error === 'object') ? (e.error.message ?? null) : null;
+        }
       });
   }
 
   deleteSchedule(scheduleId: number): void {
     if (this.deletingScheduleId !== null) return;
     this.deletingScheduleId = scheduleId;
+    this.deleteScheduleError = null;
     this.courseService.deleteCourseSchedule(scheduleId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -224,7 +246,11 @@ export class CoursedetailsComponent implements OnInit, OnDestroy {
           this.scheduleEntries = this.scheduleEntries.filter(e => e.id !== scheduleId);
           this.deletingScheduleId = null;
         },
-        error: () => this.deletingScheduleId = null
+        error: (e: HttpErrorResponse) => {
+          this.deletingScheduleId = null;
+          this.deleteScheduleError = (e.error && typeof e.error === 'object')
+            ? (e.error.message ?? 'Failed to delete schedule entry.') : 'Failed to delete schedule entry.';
+        }
       });
   }
 

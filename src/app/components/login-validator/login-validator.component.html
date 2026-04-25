@@ -1,53 +1,90 @@
 <div class="activation-page">
   <div class="activation-card">
 
-    <div class="activation-icon">
-      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24"
-           fill="none" stroke="#e53e3e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-      </svg>
-    </div>
+    <!-- ── Success state ─────────────────────────────────────── -->
+    <ng-container *ngIf="activationState === 'success'; else formTemplate">
+      <div class="activation-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24"
+             fill="none" stroke="#38a169" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+      </div>
+      <h2 class="success-title">Account Activated!</h2>
+      <p class="subtitle">Your account has been successfully activated. You can now log in.</p>
+      <button class="btn-success" (click)="goToLogin()">Go to Login</button>
+    </ng-container>
 
-    <h2>Account Activation</h2>
-    <p class="subtitle">Enter the 6-character code sent to your email</p>
+    <!-- ── Activation form ───────────────────────────────────── -->
+    <ng-template #formTemplate>
 
-    <div class="neptun-badge">{{ neptunCode }}</div>
-
-    <form (ngSubmit)="activateAccount()" [formGroup]="activationForm">
-      <div class="inputbox">
-        <input
-          type="text"
-          formControlName="activationCode"
-          placeholder="e.g. aB3xY9"
-          maxlength="6"
-          autocomplete="one-time-code"
-          spellcheck="false">
+      <div class="activation-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24"
+             fill="none" stroke="#e53e3e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
       </div>
 
-      <div *ngIf="errorStatus" class="error-message">
-        <span *ngIf="errorStatus === 400">Invalid or expired activation code.</span>
-        <span *ngIf="errorStatus !== 400">Something went wrong ({{ errorStatus }}).</span>
+      <h2>Account Activation</h2>
+      <p class="subtitle">Enter the 6-character code sent to your email</p>
+
+      <div class="neptun-badge">{{ neptunCode }}</div>
+
+      <form (ngSubmit)="activateAccount()" [formGroup]="activationForm">
+        <div class="inputbox">
+          <input
+            type="text"
+            formControlName="activationCode"
+            placeholder="e.g. aB3xY9"
+            maxlength="6"
+            autocomplete="one-time-code"
+            spellcheck="false">
+        </div>
+
+        <button class="btn-primary" type="submit" [disabled]="activationForm.invalid || activationState === 'loading'">
+          {{ activationState === 'loading' ? 'Activating…' : 'Activate Account' }}
+        </button>
+      </form>
+
+      <!-- ── Error + resend ─────────────────────────────────── -->
+      <div class="error-section" *ngIf="activationState === 'error'">
+        <p class="error-message">
+          {{ errorMessage ?? 'Invalid or expired activation code.' }}
+        </p>
+        <div class="resend-section">
+          <span class="resend-label">Request a new code:</span>
+          <button class="btn-resend"
+                  (click)="resendCode()"
+                  [disabled]="resendState === 'loading' || resendState === 'success'">
+            <ng-container [ngSwitch]="resendState">
+              <span *ngSwitchCase="'loading'">Sending…</span>
+              <span *ngSwitchCase="'success'">✓ Code sent</span>
+              <span *ngSwitchCase="'error'">Failed — try again</span>
+              <span *ngSwitchDefault>Resend code</span>
+            </ng-container>
+          </button>
+          <span class="resend-error" *ngIf="resendState === 'error' && resendErrorMessage">{{ resendErrorMessage }}</span>
+        </div>
       </div>
 
-      <button class="btn-primary" type="submit" [disabled]="activationForm.invalid || isLoading">
-        {{ isLoading ? 'Activating…' : 'Activate Account' }}
-      </button>
-    </form>
+      <!-- ── Default resend (no error yet) ─────────────────── -->
+      <div class="resend-section" *ngIf="activationState !== 'error'">
+        <span class="resend-label">Didn't receive a code?</span>
+        <button class="btn-resend"
+                (click)="resendCode()"
+                [disabled]="resendState === 'loading' || resendState === 'success'">
+          <ng-container [ngSwitch]="resendState">
+            <span *ngSwitchCase="'loading'">Sending…</span>
+            <span *ngSwitchCase="'success'">✓ Code sent</span>
+            <span *ngSwitchCase="'error'">Failed — try again</span>
+            <span *ngSwitchDefault>Resend code</span>
+          </ng-container>
+        </button>
+        <span class="resend-error" *ngIf="resendState === 'error' && resendErrorMessage">{{ resendErrorMessage }}</span>
+      </div>
 
-    <div class="resend-section">
-      <span class="resend-label">Didn't receive a code?</span>
-      <button class="btn-resend"
-              (click)="resendCode()"
-              [disabled]="resendState === 'loading' || resendState === 'success'">
-        <ng-container [ngSwitch]="resendState">
-          <span *ngSwitchCase="'loading'">Sending…</span>
-          <span *ngSwitchCase="'success'">✓ Code sent</span>
-          <span *ngSwitchCase="'error'">Failed — try again</span>
-          <span *ngSwitchDefault>Resend code</span>
-        </ng-container>
-      </button>
-    </div>
+    </ng-template>
 
   </div>
 </div>

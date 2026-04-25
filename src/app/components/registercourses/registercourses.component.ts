@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from 'src/app/services/auth.service';
 import { EnrollmentService } from 'src/app/services/enrollment.service';
 
@@ -14,7 +14,7 @@ import { EnrollmentService } from 'src/app/services/enrollment.service';
 export class RegistercoursesComponent implements OnInit, OnDestroy {
 
   courseId = 0;
-  errorStatus: number | null = null;
+  errorMessage: string | null = null;
   isLoading = false;
 
   private destroy$ = new Subject<void>();
@@ -40,21 +40,22 @@ export class RegistercoursesComponent implements OnInit, OnDestroy {
   }
 
   registerCourse(): void {
-    // I10: getLoggedUserSync() — no Observable wrapper needed for a synchronous decode
     const neptunCode = this.authService.getLoggedUserSync();
     if (!neptunCode || this.isLoading) return;
 
     this.isLoading = true;
+    this.errorMessage = null;
     this.enrollmentService.registerCourse(this.courseId, neptunCode)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (response: HttpResponse<any>) => {
+        next: () => {
           this.isLoading = false;
-          this.router.navigate(['/enrollment'], { queryParams: { status: response.status } });
+          this.router.navigate(['/enrollment']);
         },
         error: (e: HttpErrorResponse) => {
           this.isLoading = false;
-          this.errorStatus = e.status;
+          this.errorMessage = (e.error && typeof e.error === 'object')
+            ? (e.error.message ?? 'Registration failed. Please try again.') : 'Registration failed. Please try again.';
         }
       });
   }

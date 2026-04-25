@@ -28,6 +28,7 @@ export class LoginComponent implements OnInit {
   isLoading = false;
 
   errorStatus: number | null = null;
+  registerErrorMessage: string | null = null;
 
   loginForm!: FormGroup;
   registrationForm!: FormGroup;
@@ -84,6 +85,7 @@ export class LoginComponent implements OnInit {
     if (this.registrationForm.invalid || this.isLoading) return;
     this.isLoading = true;
     this.errorStatus = null;
+    this.registerErrorMessage = null;
 
     this.authService.register(
       this.registrationForm.value.password,
@@ -92,7 +94,6 @@ export class LoginComponent implements OnInit {
     ).pipe(take(1)).subscribe({
       next: () => {
         this.isLoading = false;
-        // I13: registration triggers an activation email — go straight to the validator
         this.router.navigate(['/login-validator'], {
           queryParams: { neptunCode: this.registrationForm.value.neptunCode }
         });
@@ -100,6 +101,9 @@ export class LoginComponent implements OnInit {
       error: (e: HttpErrorResponse) => {
         this.isLoading = false;
         this.errorStatus = e.status;
+        this.registerErrorMessage = (e.error && typeof e.error === 'object')
+          ? (e.error.message ?? null)
+          : null;
       }
     });
   }

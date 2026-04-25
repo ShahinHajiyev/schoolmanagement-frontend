@@ -36,39 +36,116 @@
                 <option *ngFor="let r of roles" [value]="r.key">{{ r.label }}</option>
               </select>
             </div>
-            <div class="form-field form-field--action">
-              <button
-                type="submit"
-                class="btn btn--primary"
-                [disabled]="userForm.invalid || userActionState === 'loading'">
-                {{ userActionState === 'loading' ? 'Adding...' : 'Add User' }}
-              </button>
+          </div>
+
+          <!-- Program selection — Student: single dropdown -->
+          <div class="form-row" *ngIf="selectedRole === 'Student'">
+            <div class="form-field">
+              <label class="form-label">Program</label>
+              <select class="form-input" (change)="toggleProgram(+$any($event.target).value)" *ngIf="programs.length > 0; else noPrograms">
+                <option value="0" disabled [selected]="selectedProgramIds.length === 0">— Select program —</option>
+                <option *ngFor="let p of programs" [value]="p.programId" [selected]="isProgramSelected(p.programId)">
+                  {{ p.programName }} ({{ p.programDuration }} yr)
+                </option>
+              </select>
+              <ng-template #noPrograms><span class="form-hint">No programs available.</span></ng-template>
             </div>
           </div>
+
+          <!-- Program selection — Teacher: custom checkbox dropdown up to 3 -->
+          <div class="form-row" *ngIf="selectedRole === 'Teacher'">
+            <div class="form-field">
+              <label class="form-label">
+                Programs
+                <span class="form-label-hint">({{ selectedProgramIds.length }}/3)</span>
+              </label>
+              <div class="program-dropdown" (click)="toggleProgramDropdown($event)">
+                <div class="program-dropdown__trigger">
+                  <span class="program-dropdown__value"
+                        [class.program-dropdown__value--placeholder]="selectedProgramIds.length === 0">{{ selectedProgramLabels }}</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                       fill="none" stroke="currentColor" stroke-width="2"
+                       [style.transform]="programDropdownOpen ? 'rotate(180deg)' : 'rotate(0)'">
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </div>
+                <div class="program-dropdown__panel" *ngIf="programDropdownOpen" (click)="$event.stopPropagation()">
+                  <label
+                    *ngFor="let p of programs"
+                    class="program-option"
+                    [class.program-option--disabled]="!isProgramSelected(p.programId) && selectedProgramIds.length >= 3"
+                    (click)="toggleTeacherProgram(p.programId, $event)">
+                    <span class="program-option__check"
+                          [class.program-option__check--selected]="isProgramSelected(p.programId)">
+                      <svg *ngIf="isProgramSelected(p.programId)"
+                           xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                           fill="none" stroke="#fff" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                    </span>
+                    <span>{{ p.programName }}</span>
+                    <span class="program-duration">({{ p.programDuration }} yr)</span>
+                  </label>
+                  <p class="program-dropdown__hint" *ngIf="programs.length === 0">No programs available.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row form-row--submit">
+            <button
+              type="submit"
+              class="btn btn--primary btn--submit"
+              [disabled]="userForm.invalid || userActionState === 'loading'">
+              {{ userActionState === 'loading' ? 'Adding...' : 'Add User' }}
+            </button>
+          </div>
           <p class="feedback feedback--success" *ngIf="userActionState === 'success'">User added successfully.</p>
-          <p class="feedback feedback--error"   *ngIf="userActionState === 'error'">Failed (HTTP {{ userErrorStatus }}). Check the details and retry.</p>
+          <p class="feedback feedback--error"   *ngIf="userActionState === 'error'">{{ userErrorMessage ?? 'Failed to add user. Check the details and retry.' }}</p>
         </form>
       </section>
 
-      <section class="section">
+      <section class="section section--divided">
         <h3 class="section-title">All Users</h3>
+        <div class="search-bar">
+          <input
+            class="form-input search-input"
+            type="text"
+            placeholder="Search by neptun code..."
+            [(ngModel)]="userSearchQuery" />
+        </div>
         <div class="table-wrapper">
-          <table *ngIf="users.length > 0; else noUsers">
+          <table *ngIf="filteredUsers.length > 0; else noUsers">
             <thead>
               <tr>
                 <th>Neptun Code</th>
                 <th>Email</th>
                 <th>Role</th>
+                <th>Status</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let u of users; trackBy: trackByNeptunCode">
+              <tr *ngFor="let u of filteredUsers; trackBy: trackByNeptunCode">
                 <td>{{ u.neptunCode }}</td>
                 <td>{{ u.email }}</td>
                 <td><span class="role-badge" [class.role-badge--teacher]="u.role === 'Teacher'">{{ u.role }}</span></td>
+                <td>
+                  <span *ngIf="u.activationBlockPhase === 3" class="status-badge status-badge--blocked">Permanently Blocked</span>
+                  <span *ngIf="u.activationBlockPhase > 0 && u.activationBlockPhase < 3" class="status-badge status-badge--warning">Blocked (phase {{ u.activationBlockPhase }})</span>
+                </td>
+                <td>
+                  <button *ngIf="u.activationBlockPhase > 0"
+                    class="btn btn--warning btn--sm"
+                    [disabled]="unblockingNeptunCode === u.neptunCode"
+                    (click)="unblockActivation(u.neptunCode)">
+                    {{ unblockingNeptunCode === u.neptunCode ? '...' : 'Unblock' }}
+                  </button>
+                </td>
               </tr>
             </tbody>
           </table>
+          <p class="feedback feedback--error" *ngIf="unblockError">{{ unblockError }}</p>
           <ng-template #noUsers>
             <p class="empty-state">No users found.</p>
           </ng-template>
@@ -113,11 +190,11 @@
             </div>
           </div>
           <p class="feedback feedback--success" *ngIf="courseActionState === 'success'">Course added successfully.</p>
-          <p class="feedback feedback--error"   *ngIf="courseActionState === 'error'">Failed to add course. Try again.</p>
+          <p class="feedback feedback--error"   *ngIf="courseActionState === 'error'">{{ courseErrorMessage ?? 'Failed to add course. Try again.' }}</p>
         </form>
       </section>
 
-      <section class="section">
+      <section class="section section--divided">
         <h3 class="section-title">All Courses</h3>
         <div class="table-wrapper">
           <table *ngIf="courses.length > 0; else noCourses">
@@ -151,6 +228,7 @@
             <p class="empty-state">No courses found.</p>
           </ng-template>
         </div>
+        <p class="feedback feedback--error" *ngIf="deleteCourseError">{{ deleteCourseError }}</p>
       </section>
 
     </div>
@@ -191,6 +269,7 @@
             <p class="empty-state">No enrollments found.</p>
           </ng-template>
         </div>
+        <p class="feedback feedback--error" *ngIf="deleteEnrollmentError">{{ deleteEnrollmentError }}</p>
       </section>
     </div>
 

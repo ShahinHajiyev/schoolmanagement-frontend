@@ -7,7 +7,7 @@
       <h2 class="page-title">{{ course.courseName }}</h2>
     </div>
     <div class="header-right">
-      <span *ngIf="enrollActionState === 'error'" class="error-msg">Action failed. Try again.</span>
+      <span *ngIf="enrollActionState === 'error'" class="error-msg">{{ enrollErrorMessage ?? 'Action failed. Try again.' }}</span>
       <button *ngIf="!isEnrolled" class="btn btn--primary"
         [disabled]="enrollActionState === 'loading'" (click)="register()">
         {{ enrollActionState === 'loading' ? '...' : 'Register' }}
@@ -90,7 +90,7 @@
               <div class="form-field"><label>Prerequisite</label><input class="form-input" formControlName="preliminaryRequirement" /></div>
               <div class="form-field"><label>Internet Address</label><input class="form-input" formControlName="internetAddress" /></div>
             </div>
-            <p class="feedback feedback--error" *ngIf="detailsSaveState === 'error'">Save failed. Try again.</p>
+            <p class="feedback feedback--error" *ngIf="detailsSaveState === 'error'">{{ detailsSaveErrorMessage ?? 'Save failed. Try again.' }}</p>
             <div class="form-actions">
               <button type="submit" class="btn btn--primary" [disabled]="detailsForm.invalid || detailsSaveState === 'loading'">
                 {{ detailsSaveState === 'loading' ? 'Saving...' : 'Save' }}
@@ -157,7 +157,7 @@
               </button>
             </div>
           </div>
-          <p class="feedback feedback--error" *ngIf="addScheduleState === 'error'">Failed to add. Try again.</p>
+          <p class="feedback feedback--error" *ngIf="addScheduleState === 'error'">{{ scheduleAddErrorMessage ?? 'Failed to add. Try again.' }}</p>
         </form>
       </ng-container>
 
@@ -180,6 +180,7 @@
         </tbody>
       </table>
       <ng-template #noSchedule><p class="empty-state">No schedule entries yet.</p></ng-template>
+      <p class="feedback feedback--error" *ngIf="deleteScheduleError">{{ deleteScheduleError }}</p>
     </div>
 
     <!-- Placeholder tabs -->

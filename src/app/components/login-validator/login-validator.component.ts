@@ -13,9 +13,10 @@ import { AuthService, CanComponentDeactivate, CanDeactivateType, sharedCanDeacti
 export class LoginValidatorComponent implements OnInit, CanComponentDeactivate {
 
   activationForm!: FormGroup;
-  errorStatus: number | null = null;
-  isLoading = false;
+  activationState: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+  errorMessage: string | null = null;
   resendState: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+  resendErrorMessage: string | null = null;
 
   // I8: neptunCode read from query param — not from a mutable service field
   readonly neptunCode: string;
@@ -41,29 +42,38 @@ export class LoginValidatorComponent implements OnInit, CanComponentDeactivate {
   resendCode(): void {
     if (this.resendState === 'loading') return;
     this.resendState = 'loading';
+    this.resendErrorMessage = null;
     this.authService.resendActivationCode(this.neptunCode)
       .pipe(take(1))
       .subscribe({
         next: () => { this.resendState = 'success'; },
-        error: () => { this.resendState = 'error'; }
+        error: (e: HttpErrorResponse) => {
+          this.resendState = 'error';
+          this.resendErrorMessage = (e.error && typeof e.error === 'object') ? (e.error.message ?? null) : null;
+        }
       });
   }
 
   activateAccount(): void {
-    if (this.activationForm.invalid || this.isLoading) return;
-    this.isLoading = true;
+    if (this.activationForm.invalid || this.activationState === 'loading') return;
+    this.activationState = 'loading';
+    this.errorMessage = null;
     this.authService.activateAccount(
       this.activationForm.value.activationCode,
       this.neptunCode
     ).pipe(take(1)).subscribe({
       next: () => {
-        this.isLoading = false;
-        this.router.navigate(['/login']);
+        this.activationState = 'success';
       },
       error: (e: HttpErrorResponse) => {
-        this.isLoading = false;
-        this.errorStatus = e.status;
+        this.activationState = 'error';
+        this.errorMessage = e.error?.message ?? null;
+        this.activationForm.get('activationCode')?.reset();
       }
     });
+  }
+
+  goToLogin(): void {
+    this.router.navigate(['/login']);
   }
 }

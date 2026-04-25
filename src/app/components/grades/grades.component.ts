@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Course } from 'src/app/interfaces/course';
 import { Enrollment } from 'src/app/interfaces/enrollment';
 import { AuthService } from 'src/app/services/auth.service';
@@ -30,6 +31,8 @@ export class GradesComponent implements OnInit, OnDestroy {
   gradeStates: Record<string, GradeState> = {};
   // Holds the draft value while editing
   draftGrades: Record<string, number | null> = {};
+  // Per-enrollment error messages from backend
+  gradeErrors: Record<string, string | null> = {};
 
   private destroy$ = new Subject<void>();
 
@@ -65,6 +68,7 @@ export class GradesComponent implements OnInit, OnDestroy {
     this.courseEnrollments = [];
     this.gradeStates = {};
     this.draftGrades = {};
+    this.gradeErrors = {};
 
     this.gradesService.getGradesByCourse(this.selectedCourseId)
       .pipe(takeUntil(this.destroy$))
@@ -96,6 +100,7 @@ export class GradesComponent implements OnInit, OnDestroy {
     if (grade === null || grade === undefined) return;
 
     this.gradeStates[enrollmentId] = 'loading';
+    this.gradeErrors[enrollmentId] = null;
     this.gradesService.updateGrade(enrollmentId, grade)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -104,7 +109,10 @@ export class GradesComponent implements OnInit, OnDestroy {
           if (enrollment) enrollment.grade = grade;
           this.gradeStates[enrollmentId] = 'idle';
         },
-        error: () => this.gradeStates[enrollmentId] = 'error'
+        error: (e: HttpErrorResponse) => {
+          this.gradeStates[enrollmentId] = 'error';
+          this.gradeErrors[enrollmentId] = (e.error && typeof e.error === 'object') ? (e.error.message ?? null) : null;
+        }
       });
   }
 
